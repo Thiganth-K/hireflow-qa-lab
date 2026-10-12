@@ -24,13 +24,14 @@
 | **TC-REP-01** | Rapid repeated clicks & double-submission guarded | P1 | Concurrency / Resilience | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 9) |
 | **TC-ERR-01** | Controlled server error (HTTP 500) displays friendly alert | P1 | Resilience / Error Handling | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 11) |
 | **TC-SEC-01** | Production safety guard blocks test-support endpoints | P1 | Security / Access Control | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 12) |
-| **TC-API-01** | Direct API POST rejects malformed JSON payloads | P1 | Negative / API Security | **Planned** | API test suite |
-| **TC-API-02** | Direct API POST with non-existent jobId returns 404 | P1 | Negative / API Integrity | **Planned** | API test suite |
-| **TC-API-03** | Direct API POST validates server-side without UI | P1 | Integration / API | **Planned** | API test suite |
-| **TC-RES-01** | Simulated slow network response maintains loading state | P2 | Performance / UX | **Planned** | Extended resilience |
-| **TC-NET-01** | Network disconnection triggers client offline error | P2 | Negative / Resilience | **Manual** | Network throttling simulation |
-| **TC-ACC-01** | Keyboard navigation and WCAG accessibility compliance | P2 | Accessibility (a11y) | **Manual** | Screen reader / Tab traversal |
-| **TC-CMP-01** | Responsive layout across mobile, tablet, and desktop viewports | P2 | Compatibility / UI | **Manual** | DevTools Viewport Emulation |
+| **TC-NORM-01** | Email normalization consistency across duplicate checks | P1 | Negative / Data Integrity | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 13) |
+| **TC-CROSS-01** | Same candidate applying to a different job is allowed | P1 | Positive / Business Logic | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 14) |
+| **TC-CONCUR-01**| Simultaneous requests duplicate race condition prevention | P0 | Concurrency / Data Integrity | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 15) |
+| **TC-LEAK-01** | Duplicate attempts return safe 409 without DB leaks | P1 | Security / Error Masking | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 16) |
+| **TC-AUTH-01** | Unauthenticated candidate PII listing rejected with 401 | P0 | Security / Access Control | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 17) |
+| **TC-AUTH-02** | Administrator authorization validation (Bearer & Header) | P1 | Security / Authorization | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 18) |
+| **TC-SEC-02** | Test support reset route cannot be operated in production | P0 | Security / Prod Lockdown | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 19) |
+| **TC-STATE-01**| Rejected/unauthorized requests do not mutate stored data | P1 | Integrity / Idempotency | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 20) |
 
 ---
 
@@ -402,3 +403,123 @@
   3. Check form input readability and touch target heights (min 44px).
 - **Expected Result**:
   - Layout reflows smoothly without horizontal scrollbars. Touch targets meet accessibility guidelines.
+
+---
+
+### TC-NORM-01: Email normalization consistency across duplicate checks
+- **Priority**: P1 (High)
+- **Type**: Negative / Data Integrity
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 13)
+- **Preconditions**: Test persistence cleared.
+- **Execution Steps**:
+  1. POST `/api/applications` with `Elena.Rostova+QA@TestCorp.COM`.
+  2. Assert HTTP 201 Created and normalized candidateEmail `elena.rostova+qa@testcorp.com`.
+  3. POST `/api/applications` with whitespace-padded lowercase `   elena.rostova+qa@testcorp.com   ` for the same job.
+  4. Assert HTTP 409 Conflict with descriptive duplicate error message.
+- **Expected Result**:
+  - Case variations and whitespace padding are canonicalized to identical normalized email and rejected as duplicate.
+
+---
+
+### TC-CROSS-01: Same candidate applying to a different job is allowed
+- **Priority**: P1 (High)
+- **Type**: Positive / Business Logic
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 14)
+- **Preconditions**: Test persistence cleared.
+- **Execution Steps**:
+  1. POST `/api/applications` for `job-qa-lead-001` with `marcus.vance@engineering.io`.
+  2. Assert HTTP 201 Created.
+  3. POST `/api/applications` for `job-qa-sdet-002` with same email `marcus.vance@engineering.io`.
+  4. Assert HTTP 201 Created.
+  5. Fetch applications via admin endpoint and verify exactly 2 records exist for `marcus.vance@engineering.io`.
+- **Expected Result**:
+  - A candidate can apply to multiple distinct jobs; duplicate restriction applies only per job ID.
+
+---
+
+### TC-CONCUR-01: Simultaneous requests duplicate race condition prevention
+- **Priority**: P0 (Blocker)
+- **Type**: Concurrency / Data Integrity
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 15)
+- **Preconditions**: MongoDB compound unique index `{ normalizedEmail: 1, jobId: 1 }` active; test persistence cleared.
+- **Execution Steps**:
+  1. Create payload for `job-devops-005` and `racer.concurrency@cloudscale.net`.
+  2. Dispatch 5 requests in parallel using `Promise.all`.
+  3. Collect response statuses and count 201 Created vs 409 Conflict.
+  4. Query database via admin endpoint to verify count of persisted records for that candidate and job.
+- **Expected Result**:
+  - Exactly 1 request succeeds with 201 Created.
+  - All 4 competing requests fail with 409 Conflict.
+  - Database contains exactly 1 persisted record (zero duplicate records).
+
+---
+
+### TC-LEAK-01: Duplicate attempts return safe 409 without DB leaks
+- **Priority**: P1 (High)
+- **Type**: Security / Error Masking
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 16)
+- **Preconditions**: Application already submitted for candidate.
+- **Execution Steps**:
+  1. POST second identical application to trigger duplicate key error.
+  2. Inspect response body string for sensitive terms (`MongoServerError`, `11000`, `mongodb`, `stack`).
+- **Expected Result**:
+  - Response status is 409 Conflict. Error message is customer-friendly. Zero database driver or connection internals leaked.
+
+---
+
+### TC-AUTH-01: Unauthenticated candidate PII listing rejected with 401
+- **Priority**: P0 (Blocker / Security)
+- **Type**: Security / Access Control
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 17)
+- **Preconditions**: At least one application persisted in storage.
+- **Execution Steps**:
+  1. Send unauthenticated GET `/api/applications` without Authorization or admin headers.
+  2. Assert HTTP 401 Unauthorized.
+  3. Verify response payload contains no candidate records (`data` is undefined).
+- **Expected Result**:
+  - Access is denied and applicant PII (names, emails, phones, resumes) is protected from unauthorized access.
+
+---
+
+### TC-AUTH-02: Administrator authorization validation (Bearer & Header)
+- **Priority**: P1 (High)
+- **Type**: Security / Authorization
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 18)
+- **Preconditions**: `ADMIN_API_KEY` configured in environment.
+- **Execution Steps**:
+  1. Request GET `/api/applications` with invalid Bearer token -> assert 401.
+  2. Request GET `/api/applications` with invalid `x-admin-key` header -> assert 401.
+  3. Request GET `/api/applications` with valid Bearer token -> assert 200 OK with array data.
+  4. Request GET `/api/applications` with valid `x-admin-key` -> assert 200 OK.
+- **Expected Result**:
+  - Requests with invalid credentials are rejected; valid administrator credentials successfully access records.
+
+---
+
+### TC-SEC-02: Test support reset route cannot be operated in production
+- **Priority**: P0 (Security)
+- **Type**: Security / Environment Isolation
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 19)
+- **Preconditions**: Test runner configured.
+- **Execution Steps**:
+  1. POST `/api/test-support/reset` with header `x-simulate-env: production`.
+  2. Assert HTTP 403 Forbidden.
+  3. Verify response body explains that test support endpoints are disabled in production.
+- **Expected Result**:
+  - Reset functionality is permanently disabled in production mode and cannot be overridden by headers or query parameters.
+
+---
+
+### TC-STATE-01: Rejected/unauthorized requests do not mutate stored data
+- **Priority**: P1 (High)
+- **Type**: Integrity / Idempotency
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 20)
+- **Preconditions**: Storage initialized with known baseline count.
+- **Execution Steps**:
+  1. Record baseline count of applications.
+  2. Attempt invalid job ID POST (404).
+  3. Attempt validation failure POST (400).
+  4. Fetch count again via admin endpoint.
+- **Expected Result**:
+  - Stored application count is identical to baseline count; rejected requests cause zero side-effects in storage.
+

@@ -36,24 +36,27 @@ The following functional modules and architectural layers are fully in-scope for
 4. **Application Submission API (`POST /api/applications`)**:
    - Strict server-side payload validation and sanitization.
    - Verification that target `jobId` exists in the active catalog (returns `404 Not Found`).
-   - Candidate deduplication enforcement (returns `409 Conflict`).
+   - Candidate deduplication enforcement (returns `409 Conflict`) backed by atomic compound unique index.
    - HTTP status code adherence: `201 Created`, `400 Bad Request`, `404 Not Found`, `409 Conflict`, `500 Internal Server Error`.
-   - Secure failure handling that prevents internal stack trace disclosure.
-5. **Controlled Test Failure & Resilience Simulation**:
+   - Secure failure handling that prevents internal stack trace or database driver detail disclosure.
+5. **Administrative Application Management (`GET /api/applications`)**:
+   - Server-side authorization guard enforcing `ADMIN_API_KEY` verification (`Authorization: Bearer <token>` or `x-admin-key`).
+   - Fails-closed with `401 Unauthorized` for unauthenticated or invalid callers, preventing PII disclosure.
+6. **Controlled Test Failure & Resilience Simulation**:
    - Non-production simulation hooks via request headers (`x-test-simulate-delay`, `x-test-simulate-error`, `x-test-force-reject`).
-   - In-app interactive QA simulation controls for exploratory and manual test verification.
-   - Test data reset endpoint (`POST /api/test-support/reset`) guaranteeing deterministic test isolation.
-6. **Local File-Backed Persistence (`src/lib/applications/repository.ts`)**:
-   - Isolated JSON storage at `.data/applications.json` with memory cache fallback.
+   - Interactive in-app QA simulation controls for exploratory testing.
+   - Test data reset endpoint (`POST /api/test-support/reset`) with unconditional production lockdown.
+7. **Hardened Persistence Layer (`src/lib/applications/repository.ts`)**:
+   - Primary: Native MongoDB database driver with atomic compound unique index on `{ normalizedEmail: 1, jobId: 1 }` (`unique: true`). Pre-index duplicate scan prevents silent data deletion.
+   - Secondary Fallback: Serialized in-process `AsyncMutex` lock on local file store (`.data/applications.json`), eliminating TOCTOU race conditions.
 
 ### 1.3 Out-of-Scope Functionality
-The following items are deliberately out-of-scope to adhere to the lightweight 3–4 hour single-machine assessment constraints:
-- User authentication, session management, candidate login portals, and OAuth providers.
-- External database infrastructure (PostgreSQL, MongoDB) and multi-node replication.
+The following items remain out-of-scope for the current phase:
+- User-facing candidate registration portals, applicant passwords, and OAuth SSO providers.
 - File upload systems (AWS S3, Google Cloud Storage); resume references are accepted via secure URLs.
 - Email notification dispatchers (SendGrid, AWS SES) or third-party webhooks.
 - Payment processing or employer billing systems.
-- Production multi-tenant concurrent distributed locking.
+- Distributed multi-region database clustering or multi-tenant database partitioning.
 
 ---
 
@@ -137,7 +140,7 @@ A layered test pyramid approach is adopted:
 
 ### 5.2 Exit Criteria
 1. 100% of P0 and P1 automated tests execute and pass without flakiness.
-2. Minimum of 12 automated Playwright tests executed against the running application.
+2. 20 automated Playwright tests executed against the running application (100% passing).
 3. Zero TypeScript compiler errors (`npx tsc --noEmit` exits with 0).
 4. Zero ESLint errors or warnings (`npm run lint` exits with 0).
 5. Production build succeeds (`npm run build` exits with 0).
@@ -153,8 +156,11 @@ A layered test pyramid approach is adopted:
 | **R-01** | Test order dependency or cross-test data pollution in local file storage. | High | Medium | Execute `POST /api/test-support/reset` in `test.beforeEach` before every test case; run test suite with a single worker (`workers: 1`). |
 | **R-02** | Client hydration race conditions where Playwright clicks submit before React event listeners attach. | High | High | Implement `useSyncExternalStore` hydration detection in `ApplicationForm`; keep submit button disabled in initial SSR HTML so Playwright auto-waits for hydration. |
 | **R-03** | Next.js 16 Partial Prefetching (PPR) runtime warnings breaking dynamic route prerendering. | Medium | High | Refactor `jobs/[id]` dynamic params read into a dedicated child component wrapped within a React `<Suspense>` boundary with a skeleton fallback. |
-| **R-04** | Accidental exposure of test-support simulation endpoints in production deployments. | Critical | Low | Strictly gate all simulation headers and `/api/test-support/*` routes behind `process.env.NODE_ENV !== 'production'`. Return `403 Forbidden` in production. |
+| **R-04** | Accidental exposure of test-support simulation endpoints in production deployments. | Critical | Low | Strictly gate all simulation headers and `/api/test-support/*` routes behind `process.env.NODE_ENV !== 'production'`. Return `403 Forbidden` in production unconditionally. |
 | **R-05** | Flaky tests caused by arbitrary delays or fixed sleep timers. | Medium | Medium | Strict adherence to Playwright web-first assertions (`toBeVisible({ timeout: ... })`) and zero `sleep()` statements. |
+| **R-06** | TOCTOU concurrency race conditions causing duplicate application records under parallel submissions. | Critical | High | Implement MongoDB compound unique index on `{ normalizedEmail: 1, jobId: 1 }` (`unique: true`) with error 11000 translation, paired with in-process `AsyncMutex` serialization on file fallback. Verified by automated Scenario 15. |
+| **R-07** | Unauthenticated access exposing sensitive applicant PII (names, emails, phones, resumes). | Critical | High | Implement server-side administrator authorization guard on `GET /api/applications` requiring `ADMIN_API_KEY` (`Authorization: Bearer <key>` or `x-admin-key`). Fails closed (401 Unauthorized) by default. Verified by Scenarios 17 & 18. |
+| **R-08** | Header or parameter override attempting to bypass production environment guards. | High | Low | Enforce unconditional `NODE_ENV === 'production'` 403 Forbidden checks in route handlers and add secondary defense-in-depth throws inside repository methods. Verified by Scenario 19. |
 
 ---
 
@@ -184,7 +190,8 @@ Defects are categorized by Severity:
 
 ---
 
-## 8. Limitations & Testing Assumptions
-1. **Single-Machine Storage**: The file-backed persistence layer (`.data/applications.json`) is designed for a single-machine assessment environment. It lacks multi-process distributed mutex locks.
-2. **Production Safety Testing**: While automated tests verify the production check logic via mock headers and route execution, end-to-end production testing requires a standalone production bundle deployment (`next start`).
-3. **Browser Scope**: In alignment with the time-boxed assessment requirements, automation is focused on Chromium desktop (`1280x720`). Manual smoke tests verify responsive mobile layouts.
+## 8. Limitations & Architecture Considerations
+1. **Database Mode vs. File Fallback**: When `MONGODB_URI` is provided, HireFlow connects to MongoDB and enforces atomic uniqueness at the database engine level via `{ normalizedEmail: 1, jobId: 1 }`. In environments without MongoDB, HireFlow falls back to local file storage protected by an in-process `AsyncMutex` queue; while this completely prevents race conditions on a single Node process, distributed multi-server deployments require MongoDB.
+2. **Pre-Index Data Integrity**: The repository executes an aggregation check before index creation to detect existing duplicates. If duplicates exist in legacy data, index creation halts with an actionable log instead of silently discarding user applications.
+3. **Admin Secret Key Management**: The assessment uses `ADMIN_API_KEY` for administrative access. In a production enterprise system, this would be integrated into an IAM service or OAuth provider (e.g., Auth0, Clerk, or AWS Cognito).
+4. **Browser Scope**: In alignment with assessment guidelines, automation is focused on Chromium desktop (`1280x720`). Manual smoke tests verify responsive mobile layouts.

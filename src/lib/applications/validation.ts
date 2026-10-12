@@ -11,6 +11,13 @@ export const BOUNDARIES = {
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const PHONE_CHARS_REGEX = /^[0-9+\-()\s.]+$/;
 
+/**
+ * Canonical email normalization across all application ingestion and lookup paths.
+ */
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
 export function validateApplicationInput(rawInput: unknown): ValidationResult {
   const errors: FieldValidationError[] = [];
 
@@ -125,7 +132,7 @@ export function validateApplicationInput(rawInput: unknown): ValidationResult {
   const sanitized: ApplicationInput = {
     jobId: rawJobId,
     fullName: trimmedFullName,
-    email: trimmedEmail.toLowerCase(),
+    email: normalizeEmail(trimmedEmail),
     phone: trimmedPhone,
     resumeUrl: trimmedResumeUrl,
     coverLetter: sanitizedCoverLetter

@@ -12,11 +12,19 @@ export interface ApplicationRecord {
   jobId: string;
   fullName: string;
   email: string;
+  normalizedEmail: string;
   phone: string;
   resumeUrl: string;
   coverLetter: string;
   createdAt: string;
   ipAddress?: string;
+}
+
+export class DuplicateApplicationError extends Error {
+  constructor(public readonly jobId: string, public readonly email: string) {
+    super(`Candidate '${email}' has already applied for job '${jobId}'`);
+    this.name = 'DuplicateApplicationError';
+  }
 }
 
 export interface FieldValidationError {

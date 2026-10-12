@@ -10,10 +10,11 @@
 
 The platform demonstrates:
 1. **A prioritized QA Test Plan** ([`docs/test-plan.md`](./docs/test-plan.md)) detailing objectives, scope, risk mitigations, and exit criteria.
-2. **20 Detailed Test Cases** ([`docs/test-cases.md`](./docs/test-cases.md)) spanning positive, negative, boundary, resilience, security, and accessibility scenarios.
-3. **Automated Playwright Test Suite** with 12 executed scenarios achieving a **100% pass rate** (12 passed, 0 failed, 0 skipped).
-4. **Reproducible Defect Reporting** ([`docs/bug-reports.md`](./docs/bug-reports.md)) including a reusable industry template and authentic root cause logs of historical issues diagnosed and resolved during development.
-5. **Production & Environment Safety Controls** ensuring test-only simulation mechanisms cannot be triggered in production deployments.
+2. **20 Detailed Test Cases** ([`docs/test-cases.md`](./docs/test-cases.md)) spanning positive, negative, boundary, resilience, security, concurrency, and accessibility scenarios.
+3. **Automated Playwright Test Suite** with 20 executed scenarios achieving a **100% pass rate** (20 passed, 0 failed, 0 skipped across 3 test suites).
+4. **Phase 1 Hardening Findings Table & Defect Tracking** ([`docs/bug-reports.md`](./docs/bug-reports.md)) documenting verified audit findings, TOCTOU concurrency race fixes, PII authorization protection, and reproduction tests.
+5. **Database-Backed Atomic Uniqueness**: Native MongoDB compound unique index `{ normalizedEmail: 1, jobId: 1 }` with error 11000 mapping, paired with an in-process serialized `AsyncMutex` fallback.
+6. **Production & Environment Safety Controls** ensuring test-only simulation mechanisms and reset endpoints are unconditionally locked down in production deployments.
 
 ---
 
@@ -127,7 +128,20 @@ hireflow-qa-lab/
 - **Node.js**: v20+ or v22+ LTS installed ([nodejs.org](https://nodejs.org))
 - **npm**: v10+
 
-### 5.2 Installation
+### 5.2 Environment Configuration
+Copy the provided `.env.example` template to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Configured variables:
+| Variable | Purpose | Default / Example | Fallback Behavior |
+|---|---|---|---|
+| `MONGODB_URI` | Connection URI for native MongoDB persistence | `mongodb://127.0.0.1:27017/hireflow` | Falls back to serialized `AsyncMutex` local JSON file storage (`.data/applications.json`) |
+| `ADMIN_API_KEY` | Secret token protecting `GET /api/applications` candidate PII | `hireflow-test-admin-secret-key-2026` | Fails closed (`401 Unauthorized`) |
+
+### 5.3 Installation
 Clone or navigate to the workspace directory and install dependencies:
 
 ```bash
@@ -166,14 +180,17 @@ npm run build
 Ensure the local server is running, or let Playwright launch it automatically via its built-in `webServer` configuration:
 
 ```bash
-# Execute the complete Playwright E2E suite (12 tests)
+# Execute the complete Playwright E2E suite (20 tests)
 npm run test:e2e
 
-# Execute only the 5 critical high-priority scenarios
+# Execute the 5 critical high-priority scenarios
 npx playwright test tests/critical-scenarios.spec.ts
 
-# Execute only the extended QA and edge scenarios
+# Execute the 7 extended QA and edge scenarios
 npx playwright test tests/extended-scenarios.spec.ts
+
+# Execute the 8 hardening and concurrency scenarios (Scenarios 13-20)
+npx playwright test tests/hardening-scenarios.spec.ts
 ```
 
 ### 7.2 Viewing the HTML Report
@@ -195,30 +212,39 @@ The following execution output was captured directly from the test runner:
 > hireflow-qa-lab@0.1.0 test:e2e
 > playwright test
 
-Running 12 tests using 1 worker
+Running 20 tests using 1 worker
 
-  ok  1 [chromium] › tests\critical-scenarios.spec.ts:15:7 › Scenario 1: Job listings render the required metadata (1.3s)
-  ok  2 [chromium] › tests\critical-scenarios.spec.ts:52:7 › Scenario 2: Clicking a job opens the matching details (8.6s)
-  ok  3 [chromium] › tests\critical-scenarios.spec.ts:89:7 › Scenario 3: Empty required fields are rejected (2.0s)
-  ok  4 [chromium] › tests\critical-scenarios.spec.ts:130:7 › Scenario 4: Invalid email input is rejected (2.1s)
-  ok  5 [chromium] › tests\critical-scenarios.spec.ts:168:7 › Scenario 5: A valid application produces the expected success response (2.0s)
-  ok  6 [chromium] › tests\extended-scenarios.spec.ts:15:7 › Scenario 6: Whitespace-only input in required fields is rejected (2.1s)
-  ok  7 [chromium] › tests\extended-scenarios.spec.ts:46:7 › Scenario 7: Boundary value limits are strictly validated (1.6s)
-  ok  8 [chromium] › tests\extended-scenarios.spec.ts:70:7 › Scenario 8: Duplicate applications for the same candidate and job are prevented (2.4s)
-  ok  9 [chromium] › tests\extended-scenarios.spec.ts:116:7 › Scenario 9: Submit button is disabled and guarded during submission (3.6s)
-  ok 10 [chromium] › tests\extended-scenarios.spec.ts:145:7 › Scenario 10: Invalid job ID renders accessible error state gracefully (1.9s)
-  ok 11 [chromium] › tests\extended-scenarios.spec.ts:165:7 › Scenario 11: Controlled server error (500) displays friendly error banner (1.8s)
-  ok 12 [chromium] › tests\extended-scenarios.spec.ts:197:7 › Scenario 12: Test support reset route is guarded against production use (65ms)
+  ok  1 [chromium] › tests\critical-scenarios.spec.ts:15:7 › Scenario 1: Job listings render the required metadata (731ms)
+  ok  2 [chromium] › tests\critical-scenarios.spec.ts:52:7 › Scenario 2: Clicking a job opens the matching details (1.1s)
+  ok  3 [chromium] › tests\critical-scenarios.spec.ts:89:7 › Scenario 3: Empty required fields are rejected (740ms)
+  ok  4 [chromium] › tests\critical-scenarios.spec.ts:130:7 › Scenario 4: Invalid email input is rejected (927ms)
+  ok  5 [chromium] › tests\critical-scenarios.spec.ts:168:7 › Scenario 5: A valid application produces the expected success response (948ms)
+  ok  6 [chromium] › tests\extended-scenarios.spec.ts:15:7 › Scenario 6: Whitespace-only input in required fields is rejected (863ms)
+  ok  7 [chromium] › tests\extended-scenarios.spec.ts:46:7 › Scenario 7: Boundary value limits are strictly validated (834ms)
+  ok  8 [chromium] › tests\extended-scenarios.spec.ts:70:7 › Scenario 8: Duplicate applications for the same candidate and job are prevented (1.1s)
+  ok  9 [chromium] › tests\extended-scenarios.spec.ts:116:7 › Scenario 9: Submit button is disabled and guarded during submission (2.7s)
+  ok 10 [chromium] › tests\extended-scenarios.spec.ts:145:7 › Scenario 10: Invalid job ID renders accessible error state gracefully (788ms)
+  ok 11 [chromium] › tests\extended-scenarios.spec.ts:165:7 › Scenario 11: Controlled server error (500) displays friendly error banner (859ms)
+  ok 12 [chromium] › tests\extended-scenarios.spec.ts:197:7 › Scenario 12: Test support reset route is guarded against production use (36ms)
+  ok 13 [chromium] › tests\hardening-scenarios.spec.ts:17:7 › Scenario 13: Email normalization is consistent across duplicate checks (54ms)
+  ok 14 [chromium] › tests\hardening-scenarios.spec.ts:59:7 › Scenario 14: The same candidate email applying to a different job is allowed (64ms)
+  ok 15 [chromium] › tests\hardening-scenarios.spec.ts:108:7 › Scenario 15: Concurrent requests for the same email and job cannot create duplicate records (94ms)
+  ok 16 [chromium] › tests\hardening-scenarios.spec.ts:153:7 › Scenario 16: Duplicate attempts return standard 409 without leaking DB internals (46ms)
+  ok 17 [chromium] › tests\hardening-scenarios.spec.ts:185:7 › Scenario 17: Unauthenticated application listing is rejected with 401 (43ms)
+  ok 18 [chromium] › tests\hardening-scenarios.spec.ts:212:7 › Scenario 18: Access control rejects invalid tokens and permits valid credentials (70ms)
+  ok 19 [chromium] › tests\hardening-scenarios.spec.ts:245:7 › Scenario 19: Test support reset route cannot be operated in production mode (33ms)
+  ok 20 [chromium] › tests\hardening-scenarios.spec.ts:261:7 › Scenario 20: Rejected requests do not mutate stored application data (68ms)
 
-  12 passed (31.0s)
+  20 passed (13.1s)
 ```
 
 ### Execution Metrics Summary
 | Suite | Executed | Passed | Failed | Skipped | Pass Rate | Duration |
 |---|---|---|---|---|---|---|
-| Critical Scenarios (`critical-scenarios.spec.ts`) | 5 | 5 | 0 | 0 | 100% | 15.0s |
-| Extended Scenarios (`extended-scenarios.spec.ts`) | 7 | 7 | 0 | 0 | 100% | 16.0s |
-| **Combined E2E Suite** | **12** | **12** | **0** | **0** | **100%** | **31.0s** |
+| Critical Scenarios (`critical-scenarios.spec.ts`) | 5 | 5 | 0 | 0 | 100% | ~4.6s |
+| Extended Scenarios (`extended-scenarios.spec.ts`) | 7 | 7 | 0 | 0 | 100% | ~7.2s |
+| Hardening & Concurrency (`hardening-scenarios.spec.ts`) | 8 | 8 | 0 | 0 | 100% | ~0.5s |
+| **Combined E2E & Hardening Suite** | **20** | **20** | **0** | **0** | **100%** | **13.1s** |
 
 ---
 
@@ -244,16 +270,26 @@ When all tests pass (as in the current build), zero failure screenshots are gene
 | `resumeUrl` | Yes | 5 to 250 chars; `http://` or `https://` | "Resume link or URL is required..." / "Resume URL must begin with http:// or https://" |
 | `coverLetter`| No | Max 2,000 characters | "Cover letter cannot exceed 2000 characters" |
 
-### Deduplication Policy
-- **Rule**: An application is flagged as a duplicate if the normalized email (`email.trim().toLowerCase()`) matches an existing record for the exact same `jobId`.
-- **Response**: The server returns **HTTP 409 Conflict** with an explicit error message: `"Duplicate application detected: Candidate '<email>' has already applied for role '<jobTitle>'."`
+### Deduplication Policy & Concurrency Protection
+- **Rule**: An application is flagged as a duplicate if the normalized email (`normalizeEmail(email) = email.trim().toLowerCase()`) matches an existing record for the exact same `jobId`.
+- **Database Engine Enforcement**: When connected to MongoDB, uniqueness is guaranteed at the database level by a compound unique index on `{ normalizedEmail: 1, jobId: 1 }` (`unique: true`). Pre-index duplicate scan ensures existing data integrity without silent data deletion.
+- **Race Condition Prevention**: Database duplicate key collisions (error code `11000`) are mapped to structured `DuplicateApplicationError` and returned as **HTTP 409 Conflict**.
+- **Fallback Protection**: On single-node file storage fallback, an in-process serialized `AsyncMutex` lock prevents TOCTOU race conditions.
+- **API Response**: Returns **HTTP 409 Conflict** with an explicit error message: `"Duplicate application detected: Candidate '<email>' has already applied for role '<jobTitle>'."`
+
+### Endpoint Access Control & PII Protection
+- **Candidate Submission (`POST /api/applications`)**: Public access for applicant submissions.
+- **Application Management & PII Inspection (`GET /api/applications`)**: Protected administrator endpoint. Requires `ADMIN_API_KEY` provided via `Authorization: Bearer <key>` or `x-admin-key: <key>`. Unauthenticated callers receive **HTTP 401 Unauthorized** with zero candidate data.
+- **Test-Support Data Reset (`POST /api/test-support/reset`)**: Unconditionally returns **HTTP 403 Forbidden** in production mode (`process.env.NODE_ENV === 'production'`). Cannot be enabled by headers or query parameters.
 
 ---
 
 ## 11. Known Limitations & Assessment Architecture Notes
 
-1. **Local File-Backed Persistence**: Intended specifically for a single-machine assessment environment. Stored in `.data/applications.json`. Does not provide multi-process transactional locking or ACID replication required for high-concurrency production deployments.
-2. **Production Safety Testing Note**: In the local test suite, Scenario 12 asserts the production-mode gate logic using header routing simulation against the development server. A true production verification requires building and starting Next.js in production (`NODE_ENV=production next start`).
+1. **Storage Hybrid Architecture**:
+   - Primary: When `MONGODB_URI` is provided, HireFlow connects to MongoDB and enforces atomic uniqueness at the database engine level via `{ normalizedEmail: 1, jobId: 1 }`.
+   - Fallback: In environments without MongoDB, HireFlow falls back to local file storage protected by an in-process `AsyncMutex` queue. While this completely prevents race conditions on a single Node process, distributed multi-server deployments require MongoDB.
+2. **Production Safety Verification**: The test suite validates production lockout via Scenario 12 and 19. A standalone production deployment can also be launched via `NODE_ENV=production npm run build && npm run start`.
 3. **Desktop Automation Focus**: In accordance with the time-boxed assessment requirements, automation targets Desktop Chromium (`1280x720`). Mobile and tablet viewports are validated via manual responsive checks.
 
 ---
@@ -265,16 +301,20 @@ When all tests pass (as in the current build), zero failure screenshots are gene
 - [x] Job detail pages with App Shell Suspense streaming & invalid ID 404 handling
 - [x] Client-side & server-side validation with accessible ARIA feedback
 - [x] Application submission API (`POST /api/applications`) returning appropriate HTTP statuses
-- [x] Duplicate application prevention (HTTP 409 Conflict)
+- [x] Compound unique index on MongoDB (`{ normalizedEmail: 1, jobId: 1 }`) preventing duplicate applications
+- [x] Concurrency race condition prevention verified under simultaneous requests (Scenario 15)
+- [x] Server-side administrator authorization guard on `GET /api/applications` protecting candidate PII
+- [x] Unconditional production lockdown of test-support reset endpoint (`POST /api/test-support/reset`)
 - [x] Rapid repeated-submission protection (`isSubmitting` guard & button disable)
 - [x] Controlled failure simulation (`x-test-simulate-delay`, `x-test-simulate-error: 500`)
 - [x] Test isolation reset endpoint (`POST /api/test-support/reset`)
 - [x] Prioritized QA Test Plan created ([`docs/test-plan.md`](./docs/test-plan.md))
 - [x] 20 Detailed Test Cases documented ([`docs/test-cases.md`](./docs/test-cases.md))
-- [x] Reusable Defect Report template & resolved defect logs ([`docs/bug-reports.md`](./docs/bug-reports.md))
-- [x] 12 Playwright automated tests implemented and executed
+- [x] Reusable Defect Report template, Phase 1 audit table & resolved defect logs ([`docs/bug-reports.md`](./docs/bug-reports.md))
+- [x] 20 Playwright automated tests implemented and executed (100% pass rate)
 - [x] Playwright HTML report generated ([`playwright-report/index.html`](./playwright-report/index.html))
 - [x] ESLint passing with 0 errors (`npm run lint`)
 - [x] TypeScript compiler passing with 0 errors (`npx tsc --noEmit`)
 - [x] Production build passing with 0 errors (`npm run build`)
-- [x] Complete README documentation with genuine execution metrics
+- [x] Complete README documentation with genuine execution metrics and environment instructions
+
