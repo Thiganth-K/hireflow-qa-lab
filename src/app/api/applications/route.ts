@@ -6,7 +6,11 @@ import {
   getAllApplications,
   saveApplication
 } from '@/lib/applications/repository';
-import { ApiResponse, DuplicateApplicationError } from '@/lib/applications/types';
+import {
+  ApiResponse,
+  DuplicateApplicationError,
+  DatabaseUnavailableError
+} from '@/lib/applications/types';
 
 /**
  * Access Control Helper:
@@ -35,6 +39,16 @@ function isAuthorizedAdmin(request: NextRequest): boolean {
   }
 
   return false;
+}
+
+/**
+ * Helper to validate Content-Type header matches application/json.
+ * Accepts optional parameters such as charset (e.g., application/json; charset=utf-8).
+ */
+function isApplicationJson(contentType: string | null): boolean {
+  if (!contentType) return false;
+  const mimeType = contentType.split(';')[0].trim().toLowerCase();
+  return mimeType === 'application/json';
 }
 
 export async function POST(request: NextRequest) {
@@ -68,7 +82,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Safe JSON parsing (handles malformed JSON payloads)
+    // 2. Content-Type Media Type Enforcement (AUD-P2-05)
+    // Strictly requires application/json. Rejects absent, text/plain, or unsupported media types with 415.
+    const contentType = request.headers.get('content-type');
+    if (!isApplicationJson(contentType)) {
+      const responsePayload: ApiResponse = {
+        success: false,
+        error: 'Unsupported Media Type: Content-Type must be application/json'
+      };
+      return NextResponse.json(responsePayload, { status: 415 });
+    }
+
+    // 3. Safe JSON parsing (handles malformed JSON payloads)
     let body: unknown;
     try {
       body = await request.json();
@@ -80,7 +105,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(responsePayload, { status: 400 });
     }
 
-    // 3. Server-side validation
+    // 4. Server-side validation
     const validation = validateApplicationInput(body);
     if (!validation.isValid || !validation.sanitized) {
       const responsePayload: ApiResponse = {
@@ -93,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     const { sanitized } = validation;
 
-    // 4. Job verification
+    // 5. Job verification
     const job = getJobById(sanitized.jobId);
     if (!job) {
       const responsePayload: ApiResponse = {
@@ -103,7 +128,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(responsePayload, { status: 404 });
     }
 
-    // 5. Pre-insertion deduplication check (application-level fast check)
+    // 6. Pre-insertion deduplication check (application-level fast check)
     const existing = await findApplication(sanitized.jobId, sanitized.email);
     if (existing) {
       const responsePayload: ApiResponse = {
@@ -113,7 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(responsePayload, { status: 409 });
     }
 
-    // 6. Persistence with Atomic Uniqueness Enforcement
+    // 7. Persistence with Atomic Uniqueness Enforcement
     let savedRecord;
     try {
       savedRecord = await saveApplication(sanitized);
@@ -152,6 +177,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(responsePayload, { status: 409 });
     }
 
+    if (error instanceof DatabaseUnavailableError) {
+      const responsePayload: ApiResponse = {
+        success: false,
+        error: 'Database service is currently unavailable. Please retry later.'
+      };
+      return NextResponse.json(responsePayload, { status: 503 });
+    }
+
     // Prevent leaking internal error stack traces or database connection details
     console.error('[API /api/applications] Unexpected server exception:', error);
     const responsePayload: ApiResponse = {
@@ -183,6 +216,14 @@ export async function GET(request: NextRequest) {
     };
     return NextResponse.json(responsePayload, { status: 200 });
   } catch (error: unknown) {
+    if (error instanceof DatabaseUnavailableError) {
+      const responsePayload: ApiResponse = {
+        success: false,
+        error: 'Database service is currently unavailable. Please retry later.'
+      };
+      return NextResponse.json(responsePayload, { status: 503 });
+    }
+
     console.error('[API /api/applications] Failed to fetch applications:', error);
     const responsePayload: ApiResponse = {
       success: false,

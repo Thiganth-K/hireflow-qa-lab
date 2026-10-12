@@ -1,6 +1,23 @@
+import fs from 'fs';
+import path from 'path';
 import { test, expect } from '@playwright/test';
+import {
+  saveApplication,
+  disconnectDatabase,
+  isUsingDatabase
+} from '@/lib/applications/repository';
+import { DatabaseUnavailableError } from '@/lib/applications/types';
 
-const ADMIN_SECRET = 'hireflow-test-admin-secret-key-2026';
+const configuredAdminApiKey = process.env.ADMIN_API_KEY;
+
+if (!configuredAdminApiKey) {
+  throw new Error(
+    'ADMIN_API_KEY environment variable is required for hardening tests but was not found. ' +
+    'Please ensure .env.local is configured with ADMIN_API_KEY before running the test suite.'
+  );
+}
+
+const ADMIN_SECRET = configuredAdminApiKey;
 
 test.describe('HireFlow QA Lab - Hardening & Concurrency Scenarios', () => {
   // Ensure strict test isolation by clearing local applications storage before every test
@@ -294,5 +311,194 @@ test.describe('HireFlow QA Lab - Hardening & Concurrency Scenarios', () => {
     });
     const finalBody = await finalRes.json();
     expect(finalBody.data.length).toBe(initialCount);
+  });
+
+  /**
+   * Scenario 21 (AUD-P2-05): Content-Type enforcement.
+   * Verifies that requests without application/json (such as text/plain or missing)
+   * are rejected with HTTP 415 Unsupported Media Type before parsing or persistence,
+   * while valid application/json requests (including charset params) succeed.
+   */
+  test('Scenario 21: Content-Type application/json is strictly enforced with HTTP 415', async ({ request }) => {
+    const validPayload = {
+      jobId: 'job-qa-lead-001',
+      fullName: 'Media Type Candidate',
+      email: 'media.type.test@example.com',
+      phone: '+1 555-432-1098',
+      resumeUrl: 'https://example.com/mediatype.pdf'
+    };
+
+    // 1. text/plain Content-Type -> 415
+    const textPlainRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'text/plain' },
+      data: JSON.stringify(validPayload)
+    });
+    expect(textPlainRes.status()).toBe(415);
+    const textPlainBody = await textPlainRes.json();
+    expect(textPlainBody.success).toBe(false);
+    expect(textPlainBody.error).toContain('Unsupported Media Type: Content-Type must be application/json');
+
+    // 2. application/json with charset parameter -> 201
+    const charsetRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      data: JSON.stringify(validPayload)
+    });
+    expect(charsetRes.status()).toBe(201);
+    const charsetBody = await charsetRes.json();
+    expect(charsetBody.success).toBe(true);
+
+    // 3. Storage invariant: exactly 1 record was persisted
+    const listRes = await request.get('/api/applications', {
+      headers: { Authorization: `Bearer ${ADMIN_SECRET}` }
+    });
+    const listBody = await listRes.json();
+    const matches = listBody.data.filter(
+      (app: { normalizedEmail: string }) => app.normalizedEmail === 'media.type.test@example.com'
+    );
+    expect(matches.length).toBe(1);
+  });
+
+  /**
+   * Scenario 22 (AUD-P2-06): Rejection of array, primitive, and non-object JSON payloads.
+   * Verifies that arrays ([]), primitives ("string"), and null are rejected with HTTP 400
+   * before field validation, preventing unexpected behavior or data corruption.
+   */
+  test('Scenario 22: Array and primitive JSON payloads are rejected with HTTP 400', async ({ request }) => {
+    // 1. Top-level array -> 400 with standardized error
+    const arrayRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify([])
+    });
+    expect(arrayRes.status()).toBe(400);
+    const arrayBody = await arrayRes.json();
+    expect(arrayBody.success).toBe(false);
+    expect(arrayBody.errors?.[0]?.message).toBe('Invalid payload: request body must be a JSON object');
+
+    // 2. Array containing an application object -> 400
+    const arrayOfObjRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify([{ jobId: 'job-qa-lead-001', email: 'arr@test.com' }])
+    });
+    expect(arrayOfObjRes.status()).toBe(400);
+    const arrayOfObjBody = await arrayOfObjRes.json();
+    expect(arrayOfObjBody.errors?.[0]?.message).toBe('Invalid payload: request body must be a JSON object');
+
+    // 3. Primitive string JSON -> 400
+    const stringRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify('plain-string-payload')
+    });
+    expect(stringRes.status()).toBe(400);
+    const stringBody = await stringRes.json();
+    expect(stringBody.errors?.[0]?.message).toBe('Invalid payload: request body must be a JSON object');
+
+    // 4. Null JSON -> 400
+    const nullRes = await request.post('/api/applications', {
+      headers: { 'Content-Type': 'application/json' },
+      data: JSON.stringify(null)
+    });
+    expect(nullRes.status()).toBe(400);
+    const nullBody = await nullRes.json();
+    expect(nullBody.errors?.[0]?.message).toBe('Invalid payload: request body must be a JSON object');
+  });
+
+  /**
+   * Scenario 23 (AUD-P2-02): MongoDB split-brain elimination and recovery.
+   * When MONGODB_URI is configured, MongoDB is the sole persistence engine.
+   * If MongoDB is unreachable, repository operations must throw DatabaseUnavailableError
+   * and must NEVER silently fall back to JSON storage.
+   * After restoring the valid URI, the repository must recover successfully.
+   */
+  test('Scenario 23: Configured MongoDB unavailability prevents JSON fallback and recovers cleanly', async () => {
+    const originalMongoUri = process.env.MONGODB_URI;
+    expect(originalMongoUri).toBeDefined();
+
+    const dataFile = path.join(process.cwd(), '.data', 'applications.json');
+    const fileContentBefore = fs.existsSync(dataFile) ? fs.readFileSync(dataFile, 'utf-8') : '';
+
+    try {
+      // 1. Simulate MongoDB outage by pointing to an unreachable port with short timeout
+      await disconnectDatabase();
+      process.env.MONGODB_URI = 'mongodb://127.0.0.1:27999/unreachable_db?connectTimeoutMS=1000&serverSelectionTimeoutMS=1000';
+
+      // 2. Attempt saveApplication - must reject with DatabaseUnavailableError
+      await expect(
+        saveApplication({
+          jobId: 'job-qa-lead-001',
+          fullName: 'Split Brain Prevented',
+          email: 'splitbrain@example.com',
+          phone: '+1 555-000-9999',
+          resumeUrl: 'https://example.com/resume.pdf'
+        })
+      ).rejects.toThrow(DatabaseUnavailableError);
+
+      // 3. Invariant: .data/applications.json was NOT modified (NO split-brain fallback!)
+      const fileContentAfter = fs.existsSync(dataFile) ? fs.readFileSync(dataFile, 'utf-8') : '';
+      expect(fileContentAfter).toBe(fileContentBefore);
+      expect(fileContentAfter).not.toContain('splitbrain@example.com');
+    } finally {
+      // 4. Recovery: restore original URI and reconnect cleanly
+      process.env.MONGODB_URI = originalMongoUri;
+      await disconnectDatabase();
+      const isRecovered = await isUsingDatabase();
+      expect(isRecovered).toBe(true);
+    }
+  });
+
+  /**
+   * Scenario 24 (AUD-P2-03 & AUD-P2-04): Crash-resistant atomic JSON replacement & cleanup.
+   * When in local offline mode (!MONGODB_URI), writes use temporary files, fsync,
+   * and atomic rename. Verifies no lingering temporary files remain after write.
+   */
+  test('Scenario 24: JSON persistence performs atomic replacement with zero lingering temp files', async () => {
+    const originalMongoUri = process.env.MONGODB_URI;
+    const dataDir = path.join(process.cwd(), '.data');
+
+    try {
+      // Switch temporarily to local offline mode
+      delete process.env.MONGODB_URI;
+      await disconnectDatabase();
+
+      const candidateEmail = `atomic.${Date.now()}@example.com`;
+      const record = await saveApplication({
+        jobId: 'job-qa-lead-001',
+        fullName: 'Atomic Test Candidate',
+        email: candidateEmail,
+        phone: '+1 555-321-7654',
+        resumeUrl: 'https://example.com/atomic.pdf'
+      });
+      expect(record.email).toBe(candidateEmail);
+
+      // Verify no temporary files (.applications.*.tmp) linger in .data directory
+      const lingeringTmpFiles = fs.readdirSync(dataDir).filter(
+        (f) => f.startsWith('.applications.') && f.endsWith('.tmp')
+      );
+      expect(lingeringTmpFiles.length).toBe(0);
+
+      // Verify record is durably stored in applications.json
+      const dataFile = path.join(dataDir, 'applications.json');
+      const content = fs.readFileSync(dataFile, 'utf-8');
+      expect(content).toContain(candidateEmail);
+    } finally {
+      // Restore MongoDB environment
+      process.env.MONGODB_URI = originalMongoUri;
+      await disconnectDatabase();
+      await isUsingDatabase();
+    }
+  });
+
+  /**
+   * Scenario 25 (AUD-P2-01): Authentic HTTP 404 for nonexistent jobs and HTTP 200 for valid jobs.
+   * Verifies that Next.js App Router returns genuine HTTP status 404 (not 200) for missing jobs,
+   * while valid jobs return HTTP 200.
+   */
+  test('Scenario 25: Authentic HTTP 404 returned for nonexistent jobs and 200 for valid jobs', async ({ request }) => {
+    // 1. Nonexistent job route -> genuine HTTP 404
+    const notFoundRes = await request.get('/jobs/non-existent-role-uuid-999');
+    expect(notFoundRes.status()).toBe(404);
+
+    // 2. Valid job route -> genuine HTTP 200
+    const validRes = await request.get('/jobs/job-qa-lead-001');
+    expect(validRes.status()).toBe(200);
   });
 });

@@ -143,7 +143,10 @@ test.describe('HireFlow QA Lab - Extended QA & Edge Scenarios', () => {
    * Verifies accessible "Job Posting Not Found" card and working back navigation.
    */
   test('Scenario 10: Invalid job ID renders accessible error state gracefully', async ({ page }) => {
-    await page.goto('/jobs/non-existent-role-9999');
+    const response = await page.goto('/jobs/non-existent-role-9999');
+
+    // Assert authentic HTTP 404 status code
+    expect(response?.status()).toBe(404);
 
     // Verify 404 container
     const notFoundContainer = page.getByTestId('job-not-found-container');

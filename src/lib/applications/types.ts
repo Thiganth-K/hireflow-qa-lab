@@ -27,6 +27,13 @@ export class DuplicateApplicationError extends Error {
   }
 }
 
+export class DatabaseUnavailableError extends Error {
+  constructor(message: string = 'Database service is currently unavailable. Please retry later.') {
+    super(message);
+    this.name = 'DatabaseUnavailableError';
+  }
+}
+
 export interface FieldValidationError {
   field: 'jobId' | 'fullName' | 'email' | 'phone' | 'resumeUrl' | 'coverLetter' | 'general';
   message: string;

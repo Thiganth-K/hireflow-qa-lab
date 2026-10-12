@@ -1,9 +1,9 @@
 # Test Cases Specification: HireFlow QA Lab
 
 **Platform**: HireFlow QA Lab  
-**Specification Version**: 1.0.0  
+**Specification Version**: 2.0.0  
 **Test Suite Architecture**: Next.js 16 • React 19 • Playwright Test (Chromium)  
-**Total Documented Test Cases**: 20 (12 Automated, 4 Manual, 4 Planned/API)  
+**Total Documented Test Cases**: 41 Automated Scenarios (100% Passing)  
 
 ---
 
@@ -18,7 +18,7 @@
 | **TC-VAL-02** | Whitespace-only values in required fields are rejected | P1 | Negative / Boundary | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 6) |
 | **TC-VAL-03** | Invalid email address syntax is rejected | P0 | Negative / Format Validation | **Automated (PASSED)** | `tests/critical-scenarios.spec.ts` (Scenario 4) |
 | **TC-BND-01** | Field input boundary minimums and protocols validated | P1 | Boundary / Validation | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 7) |
-| **TC-BND-02** | Maximum boundary character limits enforcement | P2 | Boundary | **Manual** | Manual verification |
+| **TC-BND-02** | Maximum boundary character limits enforcement | P1 | Boundary / Contract | **Automated (PASSED)** | `tests/form-boundaries.spec.ts` (Scenario 33) |
 | **TC-APP-01** | Valid application creates record and returns confirmation | P0 | Positive / End-to-End | **Automated (PASSED)** | `tests/critical-scenarios.spec.ts` (Scenario 5) |
 | **TC-DUP-01** | Duplicate application for same candidate & role prevented | P1 | Negative / Integrity | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 8) |
 | **TC-REP-01** | Rapid repeated clicks & double-submission guarded | P1 | Concurrency / Resilience | **Automated (PASSED)** | `tests/extended-scenarios.spec.ts` (Scenario 9) |
@@ -32,6 +32,26 @@
 | **TC-AUTH-02** | Administrator authorization validation (Bearer & Header) | P1 | Security / Authorization | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 18) |
 | **TC-SEC-02** | Test support reset route cannot be operated in production | P0 | Security / Prod Lockdown | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 19) |
 | **TC-STATE-01**| Rejected/unauthorized requests do not mutate stored data | P1 | Integrity / Idempotency | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 20) |
+| **TC-MEDIA-01**| Content-Type application/json strictly enforced (415) | P0 | Security / HTTP Contract | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 21) |
+| **TC-ARRAY-01**| Array and primitive JSON payloads rejected with 400 | P1 | Validation / Security | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 22) |
+| **TC-SPLIT-01**| MongoDB unavailability prevents JSON fallback & recovers | P0 | Resilience / Persistence | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 23) |
+| **TC-CRASH-01**| Crash-resistant JSON persistence with zero lingering tmp | P1 | Resilience / File Storage | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 24) |
+| **TC-ROUT-01** | Authentic HTTP 404 for missing jobs & 200 for valid jobs | P0 | Routing / HTTP Status | **Automated (PASSED)** | `tests/hardening-scenarios.spec.ts` (Scenario 25) |
+| **TC-SRCH-01** | Search catalog by job title | P1 | Functional / UI Search | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 26) |
+| **TC-SRCH-02** | Search catalog by company name | P1 | Functional / UI Search | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 27) |
+| **TC-SRCH-03** | Search catalog by location (on-site & remote) | P1 | Functional / UI Search | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 28) |
+| **TC-SRCH-04** | Search catalog by required skill competency | P1 | Functional / UI Search | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 29) |
+| **TC-FILT-01** | Combined job-type and job-status multi-filter | P1 | Functional / UI Filter | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 30) |
+| **TC-FILT-02** | Empty search results renders empty-state component | P1 | UI / Empty State | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 31) |
+| **TC-FILT-03** | Clearing filters restores complete catalog | P1 | Functional / UI Reset | **Automated (PASSED)** | `tests/catalog-filters.spec.ts` (Scenario 32) |
+| **TC-PHONE-01**| Phone validation rejects invalid characters & < 7 digits | P1 | Validation / Input Syntax | **Automated (PASSED)** | `tests/form-boundaries.spec.ts` (Scenario 34) |
+| **TC-COVER-01**| Successful application submission with empty cover letter | P1 | Functional / Form Optional | **Automated (PASSED)** | `tests/form-boundaries.spec.ts` (Scenario 35) |
+| **TC-CLEAR-01**| Field validation error clears dynamically on keystroke | P1 | UX / Interactive Validation | **Automated (PASSED)** | `tests/form-boundaries.spec.ts` (Scenario 36) |
+| **TC-FOCUS-01**| Keyboard focus automatically shifts to first invalid field | P1 | Accessibility / a11y Focus | **Automated (PASSED)** | `tests/form-boundaries.spec.ts` (Scenario 37) |
+| **TC-MALF-01** | Syntactically malformed JSON returns HTTP 400 Bad Request | P0 | Security / Error Boundary | **Automated (PASSED)** | `tests/api-contracts.spec.ts` (Scenario 38) |
+| **TC-NOJOB-01**| Nonexistent target jobId in payload returns HTTP 404 | P1 | Integration / Target Verification | **Automated (PASSED)** | `tests/api-contracts.spec.ts` (Scenario 39) |
+| **TC-ORDER-01**| Administrator listing follows descending creation order | P1 | Integration / Data Ordering | **Automated (PASSED)** | `tests/api-contracts.spec.ts` (Scenario 40) |
+| **TC-METADATA-01**| Database internal metadata excluded from API responses | P0 | Security / Data Sanitization | **Automated (PASSED)** | `tests/api-contracts.spec.ts` (Scenario 41) |
 
 ---
 
@@ -522,4 +542,232 @@
   4. Fetch count again via admin endpoint.
 - **Expected Result**:
   - Stored application count is identical to baseline count; rejected requests cause zero side-effects in storage.
+
+---
+
+### TC-MEDIA-01: Content-Type application/json strictly enforced
+- **Priority**: P0 (Security)
+- **Type**: HTTP Contract / Security
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 21)
+- **Execution Steps**:
+  1. POST `/api/applications` with `Content-Type: text/plain` -> assert HTTP 415.
+  2. POST `/api/applications` with `Content-Type: application/json; charset=utf-8` -> assert HTTP 201.
+  3. Verify rejected 415 requests do not mutate storage.
+- **Expected Result**:
+  - Non-JSON media types are rejected with 415 before body parsing or persistence.
+
+---
+
+### TC-ARRAY-01: Rejection of array, primitive, and non-object JSON payloads
+- **Priority**: P1 (High)
+- **Type**: Validation / Security
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 22)
+- **Execution Steps**:
+  1. POST with top-level `[]`, `[{...}]`, `"string"`, and `null`.
+  2. Assert each returns HTTP 400 Bad Request with standardized error.
+- **Expected Result**:
+  - Non-object payloads are rejected before field processing.
+
+---
+
+### TC-SPLIT-01: Configured MongoDB unavailability prevents JSON fallback and recovers cleanly
+- **Priority**: P0 (Resilience)
+- **Type**: Resilience / Persistence
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 23)
+- **Execution Steps**:
+  1. Point `MONGODB_URI` to an unreachable port.
+  2. Attempt application write -> assert `DatabaseUnavailableError`.
+  3. Assert file-based `.data/applications.json` is not modified.
+  4. Restore URI in `finally` block and verify clean recovery.
+- **Expected Result**:
+  - MongoDB is the sole source of truth; split-brain fallback is eliminated.
+
+---
+
+### TC-CRASH-01: JSON persistence performs atomic replacement with zero lingering temp files
+- **Priority**: P1 (High)
+- **Type**: Resilience / File Storage
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 24)
+- **Execution Steps**:
+  1. In offline mode, write application record.
+  2. Verify record is persisted in `applications.json`.
+  3. Verify zero `.applications.*.tmp` files remain in `.data/`.
+- **Expected Result**:
+  - Atomic rename and descriptor cleanup prevent file corruption and lingering temp files.
+
+---
+
+### TC-ROUT-01: Authentic HTTP 404 returned for nonexistent jobs and 200 for valid jobs
+- **Priority**: P0 (Blocker)
+- **Type**: Routing / HTTP Status
+- **Automation Status**: Automated (`tests/hardening-scenarios.spec.ts` — Scenario 25)
+- **Execution Steps**:
+  1. GET `/jobs/non-existent-role-uuid-999` -> assert HTTP 404 status.
+  2. GET `/jobs/job-qa-lead-001` -> assert HTTP 200 status.
+- **Expected Result**:
+  - Next.js App Router emits authentic HTTP 404 headers for invalid roles.
+
+---
+
+### TC-SRCH-01: Search catalog by job title
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Search
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 26)
+- **Execution Steps**:
+  1. Enter "Frontend" into search input.
+  2. Assert exactly 1 card is displayed matching "Senior Frontend Engineer".
+
+---
+
+### TC-SRCH-02: Search catalog by company name
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Search
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 27)
+- **Execution Steps**:
+  1. Enter "FinPulse" into search input.
+  2. Assert card displays FinPulse Systems role.
+
+---
+
+### TC-SRCH-03: Search catalog by location
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Search
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 28)
+- **Execution Steps**:
+  1. Search "Austin" -> 1 on-site position.
+  2. Search "Remote" -> 2 remote positions.
+
+---
+
+### TC-SRCH-04: Search catalog by required skill
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Search
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 29)
+- **Execution Steps**:
+  1. Search "Kubernetes" -> 1 DevOps role.
+
+---
+
+### TC-FILT-01: Combined job-type and job-status multi-filter
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Filter
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 30)
+- **Execution Steps**:
+  1. Select Job Type "Contract" + Status "Open" -> assert 1 card.
+  2. Select Job Type "Part-time" + Status "Closed" -> assert 1 card.
+  3. Select Job Type "Part-time" + Status "Open" -> assert 0 cards and empty state.
+
+---
+
+### TC-FILT-02: Empty search results renders empty-state component
+- **Priority**: P1 (High)
+- **Type**: UI / Empty State
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 31)
+- **Execution Steps**:
+  1. Enter non-matching search query.
+  2. Assert `data-testid="empty-jobs-state"` is visible with "No Job Postings Found".
+
+---
+
+### TC-FILT-03: Clearing filters restores complete catalog
+- **Priority**: P1 (High)
+- **Type**: Functional / UI Reset
+- **Automation Status**: Automated (`tests/catalog-filters.spec.ts` — Scenario 32)
+- **Execution Steps**:
+  1. Apply search and job type filter.
+  2. Click `data-testid="clear-filters-btn"`.
+  3. Assert search input is cleared and all 6 job cards are visible.
+
+---
+
+### TC-BND-02: Maximum boundary limits enforce validation contracts
+- **Priority**: P1 (High)
+- **Type**: Boundary / Contract
+- **Automation Status**: Automated (`tests/form-boundaries.spec.ts` — Scenario 33)
+- **Execution Steps**:
+  1. Test boundary maximums for fullName (80), email (100), phone (25), resumeUrl (250), coverLetter (2000).
+  2. Test +1 char beyond boundary for each field and assert descriptive rejection.
+
+---
+
+### TC-PHONE-01: Phone validation rejects invalid characters and insufficient digits
+- **Priority**: P1 (High)
+- **Type**: Validation / Input Syntax
+- **Automation Status**: Automated (`tests/form-boundaries.spec.ts` — Scenario 34)
+- **Execution Steps**:
+  1. Enter phone with invalid characters (`+1 (555) 123-4567 ext`) -> assert character syntax error.
+  2. Enter phone with < 7 digits (`12345`) -> assert 7-digit minimum error.
+  3. Enter valid format (`+1 (555) 987-6543`) -> assert submission succeeds.
+
+---
+
+### TC-COVER-01: Successful submission with empty optional cover letter
+- **Priority**: P1 (High)
+- **Type**: Functional / Form Optional
+- **Automation Status**: Automated (`tests/form-boundaries.spec.ts` — Scenario 35)
+- **Execution Steps**:
+  1. Submit application with valid mandatory fields and empty cover letter.
+  2. Assert success banner and generated application ID.
+
+---
+
+### TC-CLEAR-01: Field validation error clears dynamically on keystroke
+- **Priority**: P1 (High)
+- **Type**: UX / Interactive Validation
+- **Automation Status**: Automated (`tests/form-boundaries.spec.ts` — Scenario 36)
+- **Execution Steps**:
+  1. Trigger fullName required error.
+  2. Type into fullName input.
+  3. Assert error message is dynamically removed.
+
+---
+
+### TC-FOCUS-01: Keyboard focus automatically shifts to first invalid field
+- **Priority**: P1 (High)
+- **Type**: Accessibility / a11y Focus
+- **Automation Status**: Automated (`tests/form-boundaries.spec.ts` — Scenario 37)
+- **Execution Steps**:
+  1. Submit empty form -> assert `#fullName` is focused.
+  2. Fill fullName, submit -> assert `#email` is focused.
+
+---
+
+### TC-MALF-01: Syntactically malformed JSON returns HTTP 400 Bad Request
+- **Priority**: P0 (Security)
+- **Type**: Security / Error Boundary
+- **Automation Status**: Automated (`tests/api-contracts.spec.ts` — Scenario 38)
+- **Execution Steps**:
+  1. POST raw invalid JSON text with `Content-Type: application/json`.
+  2. Assert HTTP 400 with `'Malformed JSON payload in request body'`.
+
+---
+
+### TC-NOJOB-01: Nonexistent target jobId in payload returns HTTP 404
+- **Priority**: P1 (High)
+- **Type**: Integration / Target Verification
+- **Automation Status**: Automated (`tests/api-contracts.spec.ts` — Scenario 39)
+- **Execution Steps**:
+  1. POST valid application with `jobId: 'job-nonexistent-role-999'`.
+  2. Assert HTTP 404 with target not found message.
+
+---
+
+### TC-ORDER-01: Authenticated administrator listing follows descending creation order
+- **Priority**: P1 (High)
+- **Type**: Integration / Data Ordering
+- **Automation Status**: Automated (`tests/api-contracts.spec.ts` — Scenario 40)
+- **Execution Steps**:
+  1. Submit application A, then application B.
+  2. Query `GET /api/applications` as admin.
+  3. Assert application B appears before application A (`createdAt: -1`).
+
+---
+
+### TC-METADATA-01: Database internal metadata is excluded from API responses
+- **Priority**: P0 (Security)
+- **Type**: Security / Data Sanitization
+- **Automation Status**: Automated (`tests/api-contracts.spec.ts` — Scenario 41)
+- **Execution Steps**:
+  1. Verify `POST /api/applications` does not expose `_id` or `ipAddress`.
+  2. Verify `GET /api/applications` does not expose MongoDB `_id` on any record.
 

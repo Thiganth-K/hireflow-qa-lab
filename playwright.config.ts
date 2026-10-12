@@ -1,4 +1,25 @@
+import fs from 'fs';
+import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+
+// Automatically load local test environment configuration (.env.local) if present
+const envLocalPath = path.resolve(process.cwd(), '.env.local');
+if (fs.existsSync(envLocalPath)) {
+  if (typeof process.loadEnvFile === 'function') {
+    process.loadEnvFile(envLocalPath);
+  } else {
+    const envContent = fs.readFileSync(envLocalPath, 'utf8');
+    for (const line of envContent.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [k, ...v] = trimmed.split('=');
+        if (k && v.length > 0 && !process.env[k.trim()]) {
+          process.env[k.trim()] = v.join('=').trim();
+        }
+      }
+    }
+  }
+}
 
 /**
  * Playwright Configuration for HireFlow QA Lab.

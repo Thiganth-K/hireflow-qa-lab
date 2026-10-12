@@ -21,7 +21,7 @@ export function normalizeEmail(email: string): string {
 export function validateApplicationInput(rawInput: unknown): ValidationResult {
   const errors: FieldValidationError[] = [];
 
-  if (!rawInput || typeof rawInput !== 'object') {
+  if (!rawInput || typeof rawInput !== 'object' || Array.isArray(rawInput)) {
     return {
       isValid: false,
       errors: [{ field: 'general', message: 'Invalid payload: request body must be a JSON object' }]

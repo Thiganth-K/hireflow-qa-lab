@@ -10,8 +10,8 @@
 
 The platform demonstrates:
 1. **A prioritized QA Test Plan** ([`docs/test-plan.md`](./docs/test-plan.md)) detailing objectives, scope, risk mitigations, and exit criteria.
-2. **20 Detailed Test Cases** ([`docs/test-cases.md`](./docs/test-cases.md)) spanning positive, negative, boundary, resilience, security, concurrency, and accessibility scenarios.
-3. **Automated Playwright Test Suite** with 20 executed scenarios achieving a **100% pass rate** (20 passed, 0 failed, 0 skipped across 3 test suites).
+2. **41 Detailed Test Cases** ([`docs/test-cases.md`](./docs/test-cases.md)) spanning positive, negative, boundary, resilience, security, concurrency, catalog filtering, and accessibility scenarios.
+3. **Automated Playwright Test Suite** with 41 executed scenarios achieving a **100% pass rate** (41 passed, 0 failed, 0 skipped across 6 test suites).
 4. **Phase 1 Hardening Findings Table & Defect Tracking** ([`docs/bug-reports.md`](./docs/bug-reports.md)) documenting verified audit findings, TOCTOU concurrency race fixes, PII authorization protection, and reproduction tests.
 5. **Database-Backed Atomic Uniqueness**: Native MongoDB compound unique index `{ normalizedEmail: 1, jobId: 1 }` with error 11000 mapping, paired with an in-process serialized `AsyncMutex` fallback.
 6. **Production & Environment Safety Controls** ensuring test-only simulation mechanisms and reset endpoints are unconditionally locked down in production deployments.
@@ -139,7 +139,7 @@ Configured variables:
 | Variable | Purpose | Default / Example | Fallback Behavior |
 |---|---|---|---|
 | `MONGODB_URI` | Connection URI for native MongoDB persistence | `mongodb://127.0.0.1:27017/hireflow` | Falls back to serialized `AsyncMutex` local JSON file storage (`.data/applications.json`) |
-| `ADMIN_API_KEY` | Secret token protecting `GET /api/applications` candidate PII | `hireflow-test-admin-secret-key-2026` | Fails closed (`401 Unauthorized`) |
+| `ADMIN_API_KEY` | Secret token protecting `GET /api/applications` candidate PII | `<your_admin_api_key>` (must be set in `.env.local` and never committed) | Fails closed (`401 Unauthorized`) |
 
 ### 5.3 Installation
 Clone or navigate to the workspace directory and install dependencies:
@@ -235,16 +235,19 @@ Running 20 tests using 1 worker
   ok 19 [chromium] › tests\hardening-scenarios.spec.ts:245:7 › Scenario 19: Test support reset route cannot be operated in production mode (33ms)
   ok 20 [chromium] › tests\hardening-scenarios.spec.ts:261:7 › Scenario 20: Rejected requests do not mutate stored application data (68ms)
 
-  20 passed (13.1s)
+  41 passed (37.6s)
 ```
 
 ### Execution Metrics Summary
 | Suite | Executed | Passed | Failed | Skipped | Pass Rate | Duration |
 |---|---|---|---|---|---|---|
-| Critical Scenarios (`critical-scenarios.spec.ts`) | 5 | 5 | 0 | 0 | 100% | ~4.6s |
-| Extended Scenarios (`extended-scenarios.spec.ts`) | 7 | 7 | 0 | 0 | 100% | ~7.2s |
-| Hardening & Concurrency (`hardening-scenarios.spec.ts`) | 8 | 8 | 0 | 0 | 100% | ~0.5s |
-| **Combined E2E & Hardening Suite** | **20** | **20** | **0** | **0** | **100%** | **13.1s** |
+| Critical Scenarios (`critical-scenarios.spec.ts`) | 5 | 5 | 0 | 0 | 100% | ~6.7s |
+| Extended Scenarios (`extended-scenarios.spec.ts`) | 7 | 7 | 0 | 0 | 100% | ~9.9s |
+| Hardening & Concurrency (`hardening-scenarios.spec.ts`) | 13 | 13 | 0 | 0 | 100% | ~6.2s |
+| Catalog Filtering & Search (`catalog-filters.spec.ts`) | 7 | 7 | 0 | 0 | 100% | ~6.7s |
+| Form Boundaries & Accessibility (`form-boundaries.spec.ts`) | 5 | 5 | 0 | 0 | 100% | ~4.6s |
+| API Contracts & Error Responses (`api-contracts.spec.ts`) | 4 | 4 | 0 | 0 | 100% | ~0.4s |
+| **Combined E2E, Integration & Hardening Suite** | **41** | **41** | **0** | **0** | **100%** | **37.6s** |
 
 ---
 
@@ -272,9 +275,12 @@ When all tests pass (as in the current build), zero failure screenshots are gene
 
 ### Deduplication Policy & Concurrency Protection
 - **Rule**: An application is flagged as a duplicate if the normalized email (`normalizeEmail(email) = email.trim().toLowerCase()`) matches an existing record for the exact same `jobId`.
-- **Database Engine Enforcement**: When connected to MongoDB, uniqueness is guaranteed at the database level by a compound unique index on `{ normalizedEmail: 1, jobId: 1 }` (`unique: true`). Pre-index duplicate scan ensures existing data integrity without silent data deletion.
+- **Database Engine Enforcement**: When `MONGODB_URI` is configured, MongoDB is the **sole source of truth**. Uniqueness is guaranteed at the database level by a compound unique index on `{ normalizedEmail: 1, jobId: 1 }` (`unique: true`). Pre-index duplicate scan ensures existing data integrity without silent data deletion.
+- **Elimination of Split-Brain (AUD-P2-02)**: If MongoDB becomes unreachable when `MONGODB_URI` is configured, the application returns a controlled **HTTP 503 Service Unavailable** response without falling back to JSON. Reads, duplicate checks, and writes strictly use the selected backend.
 - **Race Condition Prevention**: Database duplicate key collisions (error code `11000`) are mapped to structured `DuplicateApplicationError` and returned as **HTTP 409 Conflict**.
-- **Fallback Protection**: On single-node file storage fallback, an in-process serialized `AsyncMutex` lock prevents TOCTOU race conditions.
+- **Crash-Resilient JSON Fallback (AUD-P2-03)**: In offline local development mode where `MONGODB_URI` is deliberately absent, records are saved using atomic temporary-file-and-rename (`fsync` + replace) with cleanup on failure. In-memory state is updated only after disk flush succeeds.
+- **JSON Concurrency Boundaries (AUD-P2-04)**: The file-fallback backend uses an in-process `AsyncMutex` that guarantees serialized execution on a single Node.js process. Because it is not a cross-process lock, file persistence is strictly restricted to single-process local development. Multi-process and production deployments strictly require MongoDB.
+- **Content-Type & Payload Validation (AUD-P2-05 & AUD-P2-06)**: `POST /api/applications` requires `Content-Type: application/json` (HTTP 415 for unsupported media types such as `text/plain`) and rejects non-object payloads (e.g. `[]`, primitives, `null`) with HTTP 400 before field-level validation.
 - **API Response**: Returns **HTTP 409 Conflict** with an explicit error message: `"Duplicate application detected: Candidate '<email>' has already applied for role '<jobTitle>'."`
 
 ### Endpoint Access Control & PII Protection
@@ -286,9 +292,10 @@ When all tests pass (as in the current build), zero failure screenshots are gene
 
 ## 11. Known Limitations & Assessment Architecture Notes
 
-1. **Storage Hybrid Architecture**:
-   - Primary: When `MONGODB_URI` is provided, HireFlow connects to MongoDB and enforces atomic uniqueness at the database engine level via `{ normalizedEmail: 1, jobId: 1 }`.
-   - Fallback: In environments without MongoDB, HireFlow falls back to local file storage protected by an in-process `AsyncMutex` queue. While this completely prevents race conditions on a single Node process, distributed multi-server deployments require MongoDB.
+1. **Storage Architecture & Concurrency Boundaries**:
+   - Primary: When `MONGODB_URI` is configured, HireFlow connects exclusively to MongoDB and enforces atomic uniqueness at the database engine level via `{ normalizedEmail: 1, jobId: 1 }`. MongoDB unavailability yields HTTP 503; silent JSON fallback is prevented.
+   - Local Offline Mode: When `MONGODB_URI` is absent, HireFlow operates in single-process local mode using atomic file replacement (`.data/applications.json`). The in-process `AsyncMutex` provides serialized mutual exclusion within a single process but does not provide cross-process locking. Clustered or multi-worker deployments require MongoDB.
+   - Hardware-Failure Disclaimer: Atomic temporary-file-and-rename with `fsync` provides resilience against process crashes and unhandled exceptions; it cannot guarantee integrity against sudden hardware power failure or underlying filesystem corruption.
 2. **Production Safety Verification**: The test suite validates production lockout via Scenario 12 and 19. A standalone production deployment can also be launched via `NODE_ENV=production npm run build && npm run start`.
 3. **Desktop Automation Focus**: In accordance with the time-boxed assessment requirements, automation targets Desktop Chromium (`1280x720`). Mobile and tablet viewports are validated via manual responsive checks.
 
@@ -309,9 +316,9 @@ When all tests pass (as in the current build), zero failure screenshots are gene
 - [x] Controlled failure simulation (`x-test-simulate-delay`, `x-test-simulate-error: 500`)
 - [x] Test isolation reset endpoint (`POST /api/test-support/reset`)
 - [x] Prioritized QA Test Plan created ([`docs/test-plan.md`](./docs/test-plan.md))
-- [x] 20 Detailed Test Cases documented ([`docs/test-cases.md`](./docs/test-cases.md))
+- [x] 41 Detailed Test Cases documented ([`docs/test-cases.md`](./docs/test-cases.md))
 - [x] Reusable Defect Report template, Phase 1 audit table & resolved defect logs ([`docs/bug-reports.md`](./docs/bug-reports.md))
-- [x] 20 Playwright automated tests implemented and executed (100% pass rate)
+- [x] 41 Playwright automated tests implemented and executed (100% pass rate)
 - [x] Playwright HTML report generated ([`playwright-report/index.html`](./playwright-report/index.html))
 - [x] ESLint passing with 0 errors (`npm run lint`)
 - [x] TypeScript compiler passing with 0 errors (`npx tsc --noEmit`)

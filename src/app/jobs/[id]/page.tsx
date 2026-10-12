@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import ApplicationForm from '@/components/ApplicationForm';
 import { getJobById } from '@/lib/jobs/service';
@@ -50,37 +51,9 @@ async function JobDetailContent({ params }: { params: Promise<{ id: string }> })
   const { id } = await params;
   const job = getJobById(id);
 
-  // Graceful Handling for Invalid or Missing Job ID
+  // Graceful Handling for Invalid or Missing Job ID: Trigger authentic HTTP 404
   if (!job) {
-    return (
-      <div
-        className="rounded-2xl border border-slate-200 bg-white p-10 sm:p-14 shadow-sm text-center"
-        data-testid="job-not-found-container"
-      >
-        <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-2xl mx-auto mb-4">
-          ✕
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900" data-testid="job-not-found-heading">
-          Job Posting Not Found
-        </h1>
-        <p className="mt-3 text-slate-600 text-sm max-w-md mx-auto">
-          We could not find any active job posting matching ID{' '}
-          <code className="bg-slate-100 px-2 py-0.5 rounded text-rose-600 font-mono text-xs">
-            {id}
-          </code>
-          . It may have been removed, archived, or the link is invalid.
-        </p>
-        <div className="mt-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 shadow-sm"
-            data-testid="back-to-jobs-link"
-          >
-            <span>← Back to All Job Listings</span>
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   return (
@@ -197,7 +170,14 @@ async function JobDetailContent({ params }: { params: Promise<{ id: string }> })
   );
 }
 
-export default function JobDetailPage({ params }: JobDetailPageProps) {
+export default async function JobDetailPage({ params }: JobDetailPageProps) {
+  const { id } = await params;
+  const job = getJobById(id);
+
+  if (!job) {
+    notFound();
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
       <Navbar />

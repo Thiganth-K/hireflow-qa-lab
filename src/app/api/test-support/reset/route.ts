@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { clearApplications } from '@/lib/applications/repository';
-import { ApiResponse } from '@/lib/applications/types';
+import { ApiResponse, DatabaseUnavailableError } from '@/lib/applications/types';
 
 /**
  * POST /api/test-support/reset
@@ -40,6 +40,13 @@ export async function POST(request: Request) {
     };
     return NextResponse.json(successPayload, { status: 200 });
   } catch (error: unknown) {
+    if (error instanceof DatabaseUnavailableError) {
+      const errorPayload: ApiResponse = {
+        success: false,
+        error: 'Database service is currently unavailable. Please retry later.'
+      };
+      return NextResponse.json(errorPayload, { status: 503 });
+    }
     console.error('[API /api/test-support/reset] Reset error:', error);
     const errorPayload: ApiResponse = {
       success: false,
