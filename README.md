@@ -236,6 +236,8 @@ npm run build
 
 ## 7. Architecture, Potential & Production Readiness
 
+![HireFlow Architecture & Workflow Diagram](public/diagram.png)
+
 ### 🏛️ Component Architecture Map
 
 ```
