@@ -74,7 +74,7 @@ start graphify-out/graph.html
 
 The user interface follows the **Quiet Precision** design methodology, balancing high visual appeal with strict functional symmetry:
 
-![Workspace Environment](public/doc2.jpg)
+![Workspace Environment](public/doc2.png)
 
 ### 🎨 Key Design System Highlights
 
