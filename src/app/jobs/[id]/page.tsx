@@ -170,6 +170,8 @@ async function JobDetailContent({ params }: { params: Promise<{ id: string }> })
   );
 }
 
+export const instant = false;
+
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params;
   const job = getJobById(id);
