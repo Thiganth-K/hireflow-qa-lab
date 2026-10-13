@@ -88,13 +88,44 @@ body {
   animation: fadeIn 180ms ease-out forwards;
 }
 
+/* Hero Section In-Animations */
+@keyframes heroEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes badgeEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-hero-entrance {
+  animation: heroEntrance 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-badge-entrance {
+  animation: badgeEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Card staggered entrance delays */
-.stagger-1 { animation-delay: 40ms; }
-.stagger-2 { animation-delay: 80ms; }
-.stagger-3 { animation-delay: 120ms; }
-.stagger-4 { animation-delay: 160ms; }
-.stagger-5 { animation-delay: 200ms; }
-.stagger-6 { animation-delay: 240ms; }
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 140ms; }
+.stagger-3 { animation-delay: 220ms; }
+.stagger-4 { animation-delay: 300ms; }
+.stagger-5 { animation-delay: 380ms; }
+.stagger-6 { animation-delay: 460ms; }
 
 /* Accessible motion: respect reduced-motion */
 @media (prefers-reduced-motion: reduce) {
