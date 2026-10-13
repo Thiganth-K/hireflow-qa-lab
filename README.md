@@ -15,7 +15,7 @@
 [![Graphify AST](https://img.shields.io/badge/Graphify-AST_Intelligence-purple)](./graphify-out/graph.html)
 [![WCAG](https://img.shields.io/badge/Accessibility-WCAG_AAA-green)](./qa-guide/index.html)
 
-[Overview](#1-project-purpose--assessment-context) • [Live Visualizers](#2-interactive-visualizers--dashboards) • [UI/UX Pro Max](#3-uiux-pro-max-design-system) • [Graphify AST](#4-graphify-codebase-intelligence) • [QA Test Harness](#5-qa-engineering-scope--41-automated-scenarios) • [Getting Started](#6-getting-started--execution-guide) • [Potential & Architecture](#7-architecture-potential--production-readiness)
+[Overview](#1-project-purpose--assessment-context) • [Live Visualizers](#2-interactive-visualizers--dashboards) • [UI/UX Pro Max](#3-uiux-pro-max-design-system) • [Graphify AST](#4-graphify-codebase-intelligence) • [QA Test Harness](#5-qa-engineering-scope--41-automated-scenarios) • [Getting Started](#6-getting-started--execution-guide) • [Potential & Architecture](#7-architecture-potential--production-readiness) • [Notes & Trade-offs](./docs/notes-tradeoffs-limitations.md)
 
 ---
 
@@ -289,6 +289,7 @@ hireflow-qa-lab/
 - [x] **Application Submission**: Happy path, duplicate prevention, canonical normalization, concurrency race conditions, and controlled error simulations verified.
 - [x] **Security & Access Control**: Candidate PII protected behind `ADMIN_API_KEY`; production lockout enforced.
 - [x] **Test Documentation**: Comprehensive test plan ([`docs/test-plan.md`](./docs/test-plan.md)), 41 test cases ([`docs/test-cases.md`](./docs/test-cases.md)), and defect audit reports ([`docs/bug-reports.md`](./docs/bug-reports.md)).
+- [x] **Notes, Trade-offs & Limitations**: Architectural notes, conscious engineering trade-offs, and production roadmap ([`docs/notes-tradeoffs-limitations.md`](./docs/notes-tradeoffs-limitations.md)).
 - [x] **Interactive Dashboards**: Standalone Visual QA Guide ([`qa-guide/index.html`](./qa-guide/index.html)) and Graphify AST Graph ([`graphify-out/graph.html`](./graphify-out/graph.html)).
 - [x] **Automated Execution**: 41/41 Playwright scenarios passing (100% pass rate).
 - [x] **Code Quality**: TypeScript (`npx tsc --noEmit`) and ESLint (`npm run lint`) passing with **0 errors**.
