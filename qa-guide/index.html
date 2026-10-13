@@ -1,0 +1,2943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HireFlow QA Lab — Quality Assurance Features Visualizer & Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1f293d;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --bg-card-hover: rgba(31, 41, 61, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-display: 'Outfit', -apple-system, sans-serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 35px -5px rgba(56, 189, 248, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-primary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-tertiary);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-cyan);
+    }
+
+    /* Top Sticky Navigation */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10, 14, 23, 0.85);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.25rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo)) !important;
+      color: #fff !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem 1.5rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 3rem 1rem 4rem 1rem;
+      position: relative;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent-cyan);
+      font-size: 0.825rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }
+      100% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.3); }
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 30%, #cbd5e1 70%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      max-width: 780px;
+      margin: 0 auto 2.5rem auto;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .kpi-card:hover::before {
+      opacity: 1;
+    }
+
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .kpi-value.cyan { color: var(--accent-cyan); }
+    .kpi-value.emerald { color: var(--accent-emerald); }
+    .kpi-value.purple { color: var(--accent-purple); }
+    .kpi-value.amber { color: var(--accent-amber); }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 0.35rem;
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Section Headers */
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 720px;
+      margin-top: 0.5rem;
+    }
+
+    /* Tab Switchers */
+    .tabs-bar {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(17, 24, 39, 0.6);
+      padding: 0.4rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-tertiary);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-btn.active.cyan { border-bottom: 2px solid var(--accent-cyan); color: var(--accent-cyan); }
+    .tab-btn.active.emerald { border-bottom: 2px solid var(--accent-emerald); color: var(--accent-emerald); }
+    .tab-btn.active.purple { border-bottom: 2px solid var(--accent-purple); color: var(--accent-purple); }
+
+    /* Interactive Architecture & Pyramid Visualizer */
+    .pyramid-container {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    @media (max-width: 900px) {
+      .pyramid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pyramid-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .pyramid-layer {
+      border-radius: 12px;
+      padding: 1.25rem 1.75rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .pyramid-layer.active {
+      transform: scale(1.02);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .layer-top {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(239, 68, 68, 0.05));
+      border-color: rgba(244, 63, 94, 0.3);
+      width: 70%;
+      margin: 0 auto;
+    }
+    .layer-top.active {
+      border-color: var(--accent-rose);
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.3), rgba(239, 68, 68, 0.1));
+    }
+
+    .layer-mid-high {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(147, 51, 234, 0.05));
+      border-color: rgba(168, 85, 247, 0.3);
+      width: 82%;
+      margin: 0 auto;
+    }
+    .layer-mid-high.active {
+      border-color: var(--accent-purple);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(147, 51, 234, 0.1));
+    }
+
+    .layer-mid-low {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(37, 99, 235, 0.05));
+      border-color: rgba(56, 189, 248, 0.3);
+      width: 92%;
+      margin: 0 auto;
+    }
+    .layer-mid-low.active {
+      border-color: var(--accent-cyan);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(37, 99, 235, 0.1));
+    }
+
+    .layer-base {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05));
+      border-color: rgba(16, 185, 129, 0.3);
+      width: 100%;
+    }
+    .layer-base.active {
+      border-color: var(--accent-emerald);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.1));
+    }
+
+    .layer-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .layer-count {
+      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .pyramid-detail {
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      padding: 1.75rem;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pyramid-detail-header {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .pyramid-detail-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .pyramid-detail-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .pyramid-detail-body {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .pyramid-detail-list {
+      margin-top: 1rem;
+      list-style: none;
+    }
+
+    .pyramid-detail-list li {
+      padding: 0.4rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .pyramid-detail-list li::before {
+      content: '✔';
+      color: var(--accent-emerald);
+      font-weight: bold;
+    }
+
+    /* 8 Core Feature Cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+    }
+
+    .feature-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feature-pill {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .pill-concurrency { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .pill-security { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); border: 1px solid rgba(168, 85, 247, 0.3); }
+    .pill-resilience { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .pill-validation { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .pill-a11y { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .feature-desc {
+      color: var(--text-muted);
+      font-size: 0.925rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+      flex-grow: 1;
+    }
+
+    .feature-highlights {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .feature-highlight-item {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+
+    .feature-highlight-item span.code-tag {
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      font-size: 0.75rem;
+    }
+
+    .feature-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .feature-footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: color 0.2s;
+    }
+
+    .feature-footer a:hover {
+      color: #fff;
+    }
+
+    /* Interactive Live QA Simulator Playground */
+    .simulator-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .sim-tabs {
+      display: flex;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .sim-tab-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .sim-tab-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .sim-tab-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .sim-panel {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .sim-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 860px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sim-card {
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .sim-card-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--bg-tertiary);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    .form-input.invalid {
+      border-color: var(--accent-rose);
+      background: rgba(244, 63, 94, 0.05);
+    }
+
+    .error-hint {
+      font-size: 0.75rem;
+      color: var(--accent-rose);
+      margin-top: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .char-counter {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      float: right;
+    }
+
+    .btn-action {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1.4rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .console-output {
+      background: #050811;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #38bdf8;
+      min-height: 240px;
+      max-height: 380px;
+      overflow-y: auto;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .console-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-right: 0.4rem;
+    }
+    .badge-201 { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); }
+    .badge-400 { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+    .badge-401 { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
+    .badge-409 { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); }
+    .badge-500 { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    /* Concurrency Race Visual Simulation */
+    .concurrency-visual-track {
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+
+    .req-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.85rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border-left: 3px solid var(--accent-blue);
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      transition: all 0.3s;
+    }
+
+    .req-item.winner {
+      border-left-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .req-item.rejected {
+      border-left-color: var(--accent-rose);
+      background: rgba(244, 63, 94, 0.1);
+    }
+
+    /* Traceability Matrix Table */
+    .matrix-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .matrix-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .matrix-search {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      min-width: 280px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .pill-filter {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.775rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .pill-filter:hover, .pill-filter.active {
+      color: #fff;
+      background: var(--bg-tertiary);
+      border-color: var(--accent-cyan);
+    }
+
+    .matrix-table-wrapper {
+      max-height: 540px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    .matrix-table th {
+      background: var(--bg-secondary);
+      padding: 0.85rem 1rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: #cbd5e1;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .matrix-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
+    .matrix-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: #fff;
+    }
+
+    .badge-priority {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .badge-p0 { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.4); }
+    .badge-p1 { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-p2 { background: rgba(56, 189, 248, 0.2); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.4); }
+
+    .status-passed {
+      color: var(--accent-emerald);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* "How to Explain to Others" Presentation Toolkit */
+    .pitch-deck-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .pitch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .pitch-card {
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      padding: 1.75rem;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.3s;
+    }
+
+    .pitch-card:hover {
+      border-color: var(--accent-indigo);
+      transform: translateY(-3px);
+    }
+
+    .pitch-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .pitch-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-indigo);
+    }
+
+    .pitch-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .pitch-audience {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .pitch-quote {
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid var(--accent-indigo);
+      padding: 0.85rem 1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      font-style: italic;
+    }
+
+    .pitch-bullets {
+      list-style: none;
+      font-size: 0.825rem;
+      color: var(--text-muted);
+    }
+
+    .pitch-bullets li {
+      padding: 0.3rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pitch-bullets li::before {
+      content: '👉';
+      font-size: 0.75rem;
+    }
+
+    /* Q&A Accordion Flashcards */
+    .qa-accordion {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .qa-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .qa-trigger {
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+      user-select: none;
+    }
+
+    .qa-trigger:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .qa-content {
+      padding: 0 1.5rem 1.25rem 1.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      display: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .qa-item.open .qa-content {
+      display: block;
+    }
+
+    .qa-item.open .qa-arrow {
+      transform: rotate(180deg);
+    }
+
+    .qa-arrow {
+      transition: transform 0.2s;
+      color: var(--text-dim);
+    }
+
+    /* Code Inspector Section */
+    .code-viewer-container {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .code-tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .code-tab-btn {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .code-tab-btn.active {
+      background: var(--bg-tertiary);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .code-box {
+      background: #060913;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      overflow-x: auto;
+      max-height: 480px;
+      white-space: pre;
+    }
+
+    .code-kw { color: #f43f5e; font-weight: 600; }
+    .code-fn { color: #38bdf8; font-weight: 500; }
+    .code-str { color: #10b981; }
+    .code-cm { color: #64748b; font-style: italic; }
+    .code-num { color: #f59e0b; }
+    .code-type { color: #a855f7; font-weight: 500; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 3rem 1.5rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    /* Copy Button Helper */
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 0.5rem;
+    }
+    .copy-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <nav class="top-nav">
+    <a href="#" class="brand">
+      <div class="brand-logo">HF</div>
+      <div>
+        <div class="brand-title">HireFlow QA Lab</div>
+      </div>
+      <span class="brand-badge">QA Visualizer</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#pyramid">Test Pyramid</a></li>
+      <li><a href="#features">8 Pillars</a></li>
+      <li><a href="#simulator">Live Simulator</a></li>
+      <li><a href="#matrix">41 Test Cases</a></li>
+      <li><a href="#pitch">Explaining to Others</a></li>
+      <li><a href="#code">Code Inspector</a></li>
+      <li><a href="../playwright-report/index.html" target="_blank" class="nav-cta">View Playwright Report ↗</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="hero-tag">
+        <span>🛡️</span>
+        <span>Deterministic QA Engineering • Next.js 16 • React 19 • Playwright</span>
+      </div>
+      <h1 class="hero-title">Quality Assurance Features & Architecture</h1>
+      <p class="hero-subtitle">
+        A deep, interactive visual guide to all the automated testing layers, concurrency hardening, data integrity boundaries, PII access controls, and failure simulation mechanisms built into the <strong>HireFlow QA Lab</strong> project.
+      </p>
+
+      <!-- KPI Summary Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value cyan">41 / 41</div>
+          <div class="kpi-label">Automated Tests</div>
+          <div class="kpi-subtext">100% Pass Rate (0 flaky, 0 skipped)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value emerald">6 Suites</div>
+          <div class="kpi-label">Test Architecture</div>
+          <div class="kpi-subtext">Playwright Chromium & API Harness</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value purple">P0 — P2</div>
+          <div class="kpi-label">Risk Priority Matrix</div>
+          <div class="kpi-subtext">Blocker, High & Boundary Coverage</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value amber">0 Open</div>
+          <div class="kpi-label">Defects Status</div>
+          <div class="kpi-subtext">All Phase 1 audit issues resolved</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value emerald">Atomic</div>
+          <div class="kpi-label">Deduplication</div>
+          <div class="kpi-subtext">MongoDB Compound Index + AsyncMutex</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: Interactive Test Pyramid -->
+    <section id="pyramid" class="section-container" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Layered Quality Strategy</span>
+        <h2 class="section-title">The HireFlow QA Test Pyramid</h2>
+        <p class="section-desc">
+          Click through each architectural tier to inspect how quality verification shifts left from static contracts down to browser E2E flows and concurrency boundaries.
+        </p>
+      </div>
+
+      <div class="pyramid-container">
+        <!-- Visual Stack -->
+        <div class="pyramid-visual">
+          <div class="pyramid-layer layer-top active" onclick="selectPyramidLayer('e2e')">
+            <div class="layer-name">
+              <span>🎭</span>
+              <span>Layer 4: End-to-End Browser Journeys</span>
+            </div>
+            <span class="layer-count">24 Tests</span>
+          </div>
+
+          <div class="pyramid-layer layer-mid-high" onclick="selectPyramidLayer('api')">
+            <div class="layer-name">
+              <span>🔌</span>
+              <span>Layer 3: API Contracts & Concurrency</span>
+            </div>
+            <span class="layer-count">17 Tests</span>
+          </div>
+
+          <div class="pyramid-layer layer-mid-low" onclick="selectPyramidLayer('persistence')">
+            <div class="layer-name">
+              <span>💾</span>
+              <span>Layer 2: Hardened Persistence & Indexing</span>
+            </div>
+            <span class="layer-count">Data Engine</span>
+          </div>
+
+          <div class="pyramid-layer layer-base" onclick="selectPyramidLayer('static')">
+            <div class="layer-name">
+              <span>⚡</span>
+              <span>Layer 1: Static Contracts & Hydration Guards</span>
+            </div>
+            <span class="layer-count">Compile-Time</span>
+          </div>
+        </div>
+
+        <!-- Detail Dynamic Panel -->
+        <div class="pyramid-detail" id="pyramid-detail-box">
+          <div class="pyramid-detail-header">
+            <div class="pyramid-detail-title" id="pyr-title">Layer 4: End-to-End (E2E) Browser Journeys</div>
+            <div class="pyramid-detail-tags" id="pyr-tags">
+              <span class="badge-tag">Playwright Test 1.64</span>
+              <span class="badge-tag">Chromium Desktop 1248</span>
+              <span class="badge-tag">Web-First Assertions</span>
+            </div>
+          </div>
+          <div class="pyramid-detail-body" id="pyr-body">
+            Simulates real user interaction with zero arbitrary sleeps. Exercises job search, real-time filtering, dynamic role detail routing, client validation error handling, keyboard focus management, and successful candidate submissions.
+            <ul class="pyramid-detail-list" id="pyr-list">
+              <li>Accessibility-first locators: <code>page.getByRole()</code>, <code>page.getByLabel()</code>, and decoupled <code>page.getByTestId()</code>.</li>
+              <li>Automated test isolation via <code>test.beforeEach</code> resetting data before every scenario.</li>
+              <li>Deterministic seed catalog of 6 technical roles (e.g. Lead QA, SDET).</li>
+              <li>Automatic failure capture: screenshots, execution traces, and video recordings.</li>
+            </ul>
+          </div>
+          <div style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-dim);">
+            File References: <span style="color: var(--accent-cyan); font-family: var(--font-mono);">tests/critical-scenarios.spec.ts</span> • <span style="color: var(--accent-cyan); font-family: var(--font-mono);">tests/extended-scenarios.spec.ts</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 8 Core QA Pillars -->
+    <section id="features" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Feature Deep Dive</span>
+        <h2 class="section-title">8 Pillars of QA Enabled in This Project</h2>
+        <p class="section-desc">
+          Beyond simple UI tests, HireFlow QA Lab implements advanced software engineering quality controls that prevent race conditions, data leaks, and production accidents.
+        </p>
+      </div>
+
+      <div class="features-grid">
+
+        <!-- Card 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.25);">
+            ⚡
+          </div>
+          <div class="feature-title">
+            <span>Concurrency & TOCTOU Guard</span>
+            <span class="feature-pill pill-concurrency">P0 Blocker</span>
+          </div>
+          <p class="feature-desc">
+            Prevents Time-of-Check to Time-of-Use race conditions where parallel requests with identical candidate emails create duplicate database entries.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>🔒 Native MongoDB index:</span>
+              <span class="code-tag">{ normalizedEmail: 1, jobId: 1 }</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>⏱️ Local fallback:</span>
+              <span class="code-tag">AsyncMutex</span> serial in-process queue
+            </div>
+            <div class="feature-highlight-item">
+              <span>🧪 Verified by Scenario 15:</span>
+              <span>5 concurrent requests ➔ 1 saved (201), 4 rejected (409)</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: repository.ts</span>
+            <a href="#simulator" onclick="switchSimTab('concurrency')">Simulate Race ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.25);">
+            🛡️
+          </div>
+          <div class="feature-title">
+            <span>PII Access Control & Auth</span>
+            <span class="feature-pill pill-security">Security</span>
+          </div>
+          <p class="feature-desc">
+            Protects applicant Personally Identifiable Information (names, phones, emails, resumes) on administrative endpoints.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>🚫 Fails-Closed:</span>
+              <span>Unauthenticated callers receive HTTP 401 Unauthorized</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🔑 Dual header support:</span>
+              <span class="code-tag">Authorization: Bearer</span> & <span class="code-tag">x-admin-key</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🧪 Verified by Scenarios 17 & 18:</span>
+              <span>Blocks leaks to public internet</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: api/applications/route.ts</span>
+            <a href="#simulator" onclick="switchSimTab('auth')">Test Auth ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.25);">
+            📏
+          </div>
+          <div class="feature-title">
+            <span>Input Boundary Gates</span>
+            <span class="feature-pill pill-validation">Data Quality</span>
+          </div>
+          <p class="feature-desc">
+            Strict client and server boundary validation preventing empty fields, whitespace-only injections, and formatting corruptions.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>🚫 Whitespace check:</span>
+              <span>Rejects pure whitespace strings ('   ')</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>📐 Limits:</span>
+              <span>Name: 2-80 • Phone: min 7 digits • URL: http/https</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>⌨️ UX:</span>
+              <span>Auto-clears errors on keystroke; preserves user input</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: validation.ts</span>
+            <a href="#simulator" onclick="switchSimTab('validation')">Test Validation ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25);">
+            🔤
+          </div>
+          <div class="feature-title">
+            <span>Email Normalization & Logic</span>
+            <span class="feature-pill pill-validation">Integrity</span>
+          </div>
+          <p class="feature-desc">
+            Canonical data normalization ensures variations like uppercase or trailing spaces never bypass deduplication, while preserving cross-job applications.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>⚙️ Normalizer:</span>
+              <span class="code-tag">email.trim().toLowerCase()</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🎯 Business rule:</span>
+              <span>1 candidate cannot reapply to same role; CAN apply to other roles</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🧪 Verified by Scenarios 13 & 14:</span>
+              <span>Consistent across ingestion & lookup</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: repository.ts</span>
+            <a href="#simulator" onclick="switchSimTab('normalize')">Test Normalizer ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.25);">
+            🧪
+          </div>
+          <div class="feature-title">
+            <span>Controlled Failure Simulator</span>
+            <span class="feature-pill pill-resilience">QA Tooling</span>
+          </div>
+          <p class="feature-desc">
+            Non-production test simulation hooks allowing QA engineers and manual testers to inject artificial network delays and server errors on demand.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>⏱️ Latency Header:</span>
+              <span class="code-tag">x-test-simulate-delay: 2000</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>💥 Error Header:</span>
+              <span class="code-tag">x-test-simulate-error: 500</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🎛️ In-App Panel:</span>
+              <span>Collapsible simulation controls directly on form UI</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Gated to NODE_ENV !== 'production'</span>
+            <a href="#simulator" onclick="switchSimTab('headers')">Try Headers ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25);">
+            ♿
+          </div>
+          <div class="feature-title">
+            <span>Hydration & a11y Safeguards</span>
+            <span class="feature-pill pill-a11y">Accessibility</span>
+          </div>
+          <p class="feature-desc">
+            Prevents native HTML form submissions before React 19 hydrates event handlers, paired with rigorous ARIA compliance.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>🛡️ React 19 Hook:</span>
+              <span class="code-tag">useSyncExternalStore</span> hydration detection
+            </div>
+            <div class="feature-highlight-item">
+              <span>♿ ARIA Support:</span>
+              <span class="code-tag">aria-invalid</span>, <span class="code-tag">aria-describedby</span>, <span class="code-tag">role="alert"</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🎯 Auto-Focus:</span>
+              <span>Focus moves directly to first invalid field on submit</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: ApplicationForm.tsx</span>
+            <a href="#code" onclick="selectCodeTab('form')">View Code ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(244, 63, 94, 0.12); border-color: rgba(244, 63, 94, 0.25);">
+            🔒
+          </div>
+          <div class="feature-title">
+            <span>Production Lockdown</span>
+            <span class="feature-pill pill-security">Defense-In-Depth</span>
+          </div>
+          <p class="feature-desc">
+            Guarantees that test endpoints and destructive reset actions cannot be operated or tricked in production environments.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>🚫 Lockdown Route:</span>
+              <span class="code-tag">POST /api/test-support/reset</span> yields HTTP 403
+            </div>
+            <div class="feature-highlight-item">
+              <span>🛡️ Hard Check:</span>
+              <span class="code-tag">process.env.NODE_ENV === 'production'</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🧪 Verified by Scenario 19:</span>
+              <span>Cannot be bypassed by query or header overrides</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: reset/route.ts</span>
+            <a href="#matrix">Check Scenario 19 ➔</a>
+          </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="feature-card">
+          <div class="feature-icon-wrapper" style="background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.25);">
+            🔄
+          </div>
+          <div class="feature-title">
+            <span>Split-Brain & Crash Safety</span>
+            <span class="feature-pill pill-resilience">Storage Architecture</span>
+          </div>
+          <p class="feature-desc">
+            Eliminates silent storage fallbacks that would fragment state across multiple databases, plus crash-resistant atomic file writes.
+          </p>
+          <div class="feature-highlights">
+            <div class="feature-highlight-item">
+              <span>⚡ Split-Brain Prevention:</span>
+              <span>MongoDB outage returns HTTP 503 instead of silent JSON fallback</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>📝 Crash-Resistant:</span>
+              <span>Temporary file ➔ fsync ➔ atomic replace (0 lingering .tmp)</span>
+            </div>
+            <div class="feature-highlight-item">
+              <span>🧪 Verified by Scenarios 23 & 24:</span>
+              <span>Clean recovery upon database reconnect</span>
+            </div>
+          </div>
+          <div class="feature-footer">
+            <span>Enforced in: repository.ts</span>
+            <a href="#code" onclick="selectCodeTab('repo')">Inspect Logic ➔</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: Interactive Live Simulator (Playground) -->
+    <section id="simulator" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Interactive Playground</span>
+        <h2 class="section-title">Test the QA Features Live</h2>
+        <p class="section-desc">
+          Interact directly with the exact business rules, regexes, deduplication policies, and authorization gates enforced by HireFlow QA Lab.
+        </p>
+      </div>
+
+      <div class="simulator-container">
+        <!-- Simulator Navigation Tabs -->
+        <div class="sim-tabs">
+          <button class="sim-tab-btn active" onclick="switchSimTab('validation')">
+            <span>📏</span> 1. Form Validation & Boundaries
+          </button>
+          <button class="sim-tab-btn" onclick="switchSimTab('concurrency')">
+            <span>⚡</span> 2. Concurrency Race (Scenario 15)
+          </button>
+          <button class="sim-tab-btn" onclick="switchSimTab('normalize')">
+            <span>🔤</span> 3. Email Normalization & Deduplication
+          </button>
+          <button class="sim-tab-btn" onclick="switchSimTab('auth')">
+            <span>🛡️</span> 4. Admin PII Access & Auth
+          </button>
+          <button class="sim-tab-btn" onclick="switchSimTab('headers')">
+            <span>🧪</span> 5. QA Simulation Headers
+          </button>
+        </div>
+
+        <!-- SIM PANEL 1: Validation -->
+        <div class="sim-panel active" id="sim-panel-validation">
+          <div class="sim-grid">
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Client & Server Boundary Sandbox</span>
+                <span class="badge-tag">validation.ts</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Full Name (2 – 80 chars, non-whitespace)
+                  <span class="char-counter" id="val-name-count">0 / 80</span>
+                </label>
+                <input type="text" id="val-name" class="form-input" placeholder="e.g. Morgan Freeman" oninput="runLiveValidation()">
+                <div class="error-hint" id="val-name-err" style="display: none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Email Address (RFC Regex, max 100)
+                  <span class="char-counter" id="val-email-count">0 / 100</span>
+                </label>
+                <input type="text" id="val-email" class="form-input" placeholder="e.g. morgan@example.com" oninput="runLiveValidation()">
+                <div class="error-hint" id="val-email-err" style="display: none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Phone Number (min 7 digits, 7 – 25 chars)
+                  <span class="char-counter" id="val-phone-count">0 / 25</span>
+                </label>
+                <input type="text" id="val-phone" class="form-input" placeholder="e.g. +1 555-019-2831" oninput="runLiveValidation()">
+                <div class="error-hint" id="val-phone-err" style="display: none;"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">
+                  Resume URL (5 – 250 chars, http:// or https://)
+                  <span class="char-counter" id="val-url-count">0 / 250</span>
+                </label>
+                <input type="text" id="val-url" class="form-input" placeholder="https://example.com/resume.pdf" oninput="runLiveValidation()">
+                <div class="error-hint" id="val-url-err" style="display: none;"></div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                <button class="btn-action" onclick="testValidPreset()">Fill Valid Persona</button>
+                <button class="btn-reset" onclick="testWhitespacePreset()">Test Whitespace ('   ')</button>
+                <button class="btn-reset" onclick="clearValidationInputs()">Clear</button>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Validation Engine Output</span>
+                <span class="badge-tag" id="val-status-badge">PASSING</span>
+              </div>
+              <div class="console-output" id="val-console">Type in the inputs on the left to see live boundary evaluation...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIM PANEL 2: Concurrency Race -->
+        <div class="sim-panel" id="sim-panel-concurrency">
+          <div class="sim-grid">
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Simulate Scenario 15 Race Condition</span>
+                <span class="badge-tag">Promise.all ([5 requests])</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                In a naive system, 5 simultaneous requests with the exact same candidate email would all check <code>findApplication</code> before writing, causing all 5 to insert duplicates (TOCTOU bug).
+                Watch how HireFlow's compound unique index + AsyncMutex ensures only 1 succeeds!
+              </p>
+
+              <div class="form-group">
+                <label class="form-label">Target Role</label>
+                <select id="race-job" class="form-select">
+                  <option value="job-qa-lead-001">job-qa-lead-001 (Lead QA Automation Engineer)</option>
+                  <option value="job-qa-sdet-002">job-qa-sdet-002 (Senior SDET)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Candidate Email (Shared by all 5 parallel threads)</label>
+                <input type="text" id="race-email" class="form-input" value="alexandra.concurrency@qa-lab.io">
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                <button class="btn-action" id="btn-run-race" onclick="runConcurrencyRaceSimulation()">
+                  <span>🚀</span> Fire 5 Parallel Requests
+                </button>
+                <button class="btn-reset" onclick="resetRaceTrack()">Reset State</button>
+              </div>
+
+              <div class="concurrency-visual-track" id="race-track">
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.5rem;">Simulated Thread Execution Status:</div>
+                <div class="req-item" id="req-1"><span>Request #1 (Thread Alpha)</span><span class="badge-tag">READY</span></div>
+                <div class="req-item" id="req-2"><span>Request #2 (Thread Beta)</span><span class="badge-tag">READY</span></div>
+                <div class="req-item" id="req-3"><span>Request #3 (Thread Gamma)</span><span class="badge-tag">READY</span></div>
+                <div class="req-item" id="req-4"><span>Request #4 (Thread Delta)</span><span class="badge-tag">READY</span></div>
+                <div class="req-item" id="req-5"><span>Request #5 (Thread Epsilon)</span><span class="badge-tag">READY</span></div>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Database Collision & Response Log</span>
+                <span class="badge-tag">HTTP 201 vs 409</span>
+              </div>
+              <div class="console-output" id="race-console">Click 'Fire 5 Parallel Requests' to run the automated concurrency scenario...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIM PANEL 3: Normalization -->
+        <div class="sim-panel" id="sim-panel-normalize">
+          <div class="sim-grid">
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Email Normalization & Deduplication Policy</span>
+                <span class="badge-tag">Scenarios 13 & 14</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Job ID</label>
+                <select id="norm-job" class="form-select">
+                  <option value="job-qa-lead-001">job-qa-lead-001 (Lead QA)</option>
+                  <option value="job-qa-sdet-002">job-qa-sdet-002 (Senior SDET - Different Job)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Raw Candidate Email</label>
+                <input type="text" id="norm-email" class="form-input" value="   Elena.Rostova+QA@TestCorp.COM   ">
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.35rem;">
+                  Canonical Normalized: <code id="norm-preview" style="color: var(--accent-cyan);">elena.rostova+qa@testcorp.com</code>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                <button class="btn-action" onclick="submitNormalizedApplication()">Submit Application</button>
+                <button class="btn-reset" onclick="resetSimDatabase()">Wipe Store</button>
+              </div>
+            </div>
+
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Mock Persistence Store</span>
+                <span class="badge-tag" id="norm-count-badge">0 Applications Stored</span>
+              </div>
+              <div class="console-output" id="norm-console">Persistent candidate records will show here. Try submitting once, then submitting again with different casing or whitespace!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIM PANEL 4: Auth & PII -->
+        <div class="sim-panel" id="sim-panel-auth">
+          <div class="sim-grid">
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>GET /api/applications Authorization Gate</span>
+                <span class="badge-tag">Scenarios 17 & 18</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                Simulates accessing applicant PII (names, phone numbers, emails, resumes). Verified to fail-closed with 401 Unauthorized unless authenticated.
+              </p>
+
+              <div class="form-group">
+                <label class="form-label">Authentication Header Mode</label>
+                <select id="auth-mode" class="form-select" onchange="updateAuthHeaderUI()">
+                  <option value="none">No Credentials (Anonymous Public Caller)</option>
+                  <option value="bearer">Authorization: Bearer &lt;token&gt;</option>
+                  <option value="header">Custom Header: x-admin-key: &lt;token&gt;</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="auth-token-group" style="display: none;">
+                <label class="form-label">Token Value</label>
+                <input type="text" id="auth-token" class="form-input" placeholder="Enter token value...">
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                  <button class="btn-reset" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setTokenPreset('correct')">Fill Correct Secret</button>
+                  <button class="btn-reset" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="setTokenPreset('wrong')">Fill Invalid Token</button>
+                </div>
+              </div>
+
+              <button class="btn-action" style="margin-top: 1rem;" onclick="testAuthRequest()">
+                <span>🔍</span> Execute GET /api/applications
+              </button>
+            </div>
+
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Response Payload & Security Status</span>
+                <span class="badge-tag" id="auth-status-badge">STANDBY</span>
+              </div>
+              <div class="console-output" id="auth-console">Select an authentication method and execute the request to inspect PII protection...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIM PANEL 5: QA Simulation Headers -->
+        <div class="sim-panel" id="sim-panel-headers">
+          <div class="sim-grid">
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>In-App QA Failure Simulation</span>
+                <span class="badge-tag">Scenario 11</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                HireFlow includes special development-mode simulation headers that allow testers to evaluate resilience without mocking frameworks.
+              </p>
+
+              <div class="form-group">
+                <label class="form-label">Simulate Server Error (x-test-simulate-error)</label>
+                <select id="sim-header-err" class="form-select">
+                  <option value="none">None (Standard Behavior)</option>
+                  <option value="500">500 — Internal Server Error Simulation</option>
+                  <option value="400">400 — Forced Client Rejection</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Simulate Injected Latency (x-test-simulate-delay)</label>
+                <select id="sim-header-delay" class="form-select">
+                  <option value="0">0ms (Immediate)</option>
+                  <option value="1000">1,000ms (1 second network delay)</option>
+                  <option value="2500">2,500ms (2.5 seconds network delay)</option>
+                </select>
+              </div>
+
+              <button class="btn-action" style="margin-top: 1rem;" id="btn-fire-sim" onclick="executeSimulationHeaders()">
+                <span>🧪</span> Dispatch Request with QA Headers
+              </button>
+            </div>
+
+            <div class="sim-card">
+              <div class="sim-card-title">
+                <span>Simulation Client Result</span>
+                <span class="badge-tag" id="header-status-badge">READY</span>
+              </div>
+              <div class="console-output" id="headers-console">Select headers and dispatch to see artificial latency and controlled error banners...</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: 41 Test Cases Traceability Matrix -->
+    <section id="matrix" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Specification Matrix</span>
+        <h2 class="section-title">All 41 Automated Scenarios</h2>
+        <p class="section-desc">
+          Search and filter the complete test suite. Every single documented test case runs against the live Next.js application with zero flakiness.
+        </p>
+      </div>
+
+      <div class="matrix-container">
+        <div class="matrix-controls">
+          <input type="text" class="matrix-search" id="matrix-search-input" placeholder="Search by ID, keyword, or suite..." oninput="filterMatrix()">
+          
+          <div class="filter-pills">
+            <button class="pill-filter active" onclick="filterByPriority('all', this)">All (41)</button>
+            <button class="pill-filter" onclick="filterByPriority('P0', this)">P0 Blocker</button>
+            <button class="pill-filter" onclick="filterByPriority('P1', this)">P1 High</button>
+            <button class="pill-filter" onclick="filterByPriority('P2', this)">P2 Medium</button>
+          </div>
+        </div>
+
+        <div class="matrix-table-wrapper">
+          <table class="matrix-table">
+            <thead>
+              <tr>
+                <th style="width: 110px;">Test ID</th>
+                <th>Scenario Description</th>
+                <th style="width: 80px;">Priority</th>
+                <th>Type</th>
+                <th>Test Suite File</th>
+                <th style="width: 100px;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="matrix-tbody">
+              <!-- Dynamically Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: "How to Explain This to Others" -->
+    <section id="pitch" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Presentation Toolkit</span>
+        <h2 class="section-title">How to Explain HireFlow QA to Others</h2>
+        <p class="section-desc">
+          Whether you are walking an interviewer, technical manager, or fellow QA engineer through this repository, use these structured speaking guides and elevator pitches.
+        </p>
+      </div>
+
+      <div class="pitch-deck-container">
+        <div class="pitch-grid">
+
+          <!-- 2-Minute Elevator Pitch -->
+          <div class="pitch-card">
+            <div class="pitch-header">
+              <div class="pitch-icon">⏱️</div>
+              <div>
+                <div class="pitch-title">The 2-Minute Pitch</div>
+                <div class="pitch-audience">For: Quick Introductions & Interviews</div>
+              </div>
+            </div>
+            <div class="pitch-quote">
+              "HireFlow QA Lab is a high-reliability recruitment platform designed specifically to evaluate modern QA automation. Rather than just testing UI clicks, it demonstrates end-to-end quality engineering: 41 automated Playwright scenarios across 6 test suites, client-side hydration guards for React 19, MongoDB compound unique indexes to eliminate TOCTOU race conditions, strict PII authorization, and in-app QA failure simulation."
+            </div>
+            <ul class="pitch-bullets">
+              <li>Highlight the 100% pass rate across 41 tests.</li>
+              <li>Mention the zero-sleep web-first assertion strategy.</li>
+              <li>Emphasize that it tests backend concurrency, not just frontend.</li>
+            </ul>
+          </div>
+
+          <!-- Technical Deep Dive -->
+          <div class="pitch-card">
+            <div class="pitch-header">
+              <div class="pitch-icon">🔬</div>
+              <div>
+                <div class="pitch-title">The 5-Minute Technical Deep Dive</div>
+                <div class="pitch-audience">For: Senior Developers & Tech Leads</div>
+              </div>
+            </div>
+            <div class="pitch-quote">
+              "The most interesting QA challenge in this project was preventing concurrency race conditions during application submissions. If two requests with the same email fire simultaneously, application-level checks fail. We solved this with a database-level compound unique index on normalized email and job ID, backed by an AsyncMutex for file fallback. We verified this with Playwright firing 5 simultaneous requests via Promise.all—exactly 1 returned 201 Created and 4 returned 409 Conflict."
+            </div>
+            <ul class="pitch-bullets">
+              <li>Explain the difference between application-level vs DB-level uniqueness.</li>
+              <li>Explain how split-brain was prevented (503 on MongoDB disconnect).</li>
+              <li>Explain how React 19 useSyncExternalStore prevented form submit races.</li>
+            </ul>
+          </div>
+
+          <!-- Role-Tailored Talking Points -->
+          <div class="pitch-card">
+            <div class="pitch-header">
+              <div class="pitch-icon">🎯</div>
+              <div>
+                <div class="pitch-title">Key Value by Stakeholder</div>
+                <div class="pitch-audience">For: Tailoring to Your Audience</div>
+              </div>
+            </div>
+            <div class="pitch-quote">
+              "Every stakeholder cares about a different aspect of quality. Here is what to highlight based on who is listening:"
+            </div>
+            <ul class="pitch-bullets">
+              <li><strong>QA Managers:</strong> Test determinism, isolated reset endpoint, and traceability matrix.</li>
+              <li><strong>Security Leads:</strong> Fails-closed candidate PII on GET, production lockdown, error stack masking.</li>
+              <li><strong>Frontend Devs:</strong> ARIA accessibility, focus management, dynamic keystroke error clearing.</li>
+              <li><strong>DevOps/SRE:</strong> Production 403 safety lock, atomic crash-resistant file replacement.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <!-- Anticipated Q&A Flashcards -->
+        <h3 style="font-family: var(--font-display); font-size: 1.4rem; color: #fff; margin-top: 3rem; margin-bottom: 1rem;">
+          💬 Frequently Asked Questions & Confident Answers
+        </h3>
+        
+        <div class="qa-accordion">
+
+          <div class="qa-item" onclick="toggleQA(this)">
+            <div class="qa-trigger">
+              <span>Q: Why is Playwright configured with <code>workers: 1</code> instead of parallel workers?</span>
+              <span class="qa-arrow">▼</span>
+            </div>
+            <div class="qa-content">
+              <strong>Answer:</strong> In local offline development mode, the application falls back to an isolated single-file store (<code>.data/applications.json</code>). While protected by an in-process <code>AsyncMutex</code>, multiple Node or Playwright workers would create cross-process file lock contention. Running sequentially with <code>workers: 1</code> guarantees 100% deterministic test isolation and fast, zero-flakiness execution (all 41 tests finish in ~37 seconds). When deployed with MongoDB, full multi-worker parallelism is supported.
+            </div>
+          </div>
+
+          <div class="qa-item" onclick="toggleQA(this)">
+            <div class="qa-trigger">
+              <span>Q: What is the React 19 hydration bug and how did you resolve it?</span>
+              <span class="qa-arrow">▼</span>
+            </div>
+            <div class="qa-content">
+              <strong>Answer:</strong> During fast automated test runs, Playwright clicks the submit button as soon as the HTML enters the DOM, often a few milliseconds before React finishes attaching its synthetic <code>onSubmit</code> event listener. In native HTML, clicking submit causes the browser to issue an unhandled document reload. We resolved this using React 19's idiomatic <code>useSyncExternalStore</code> hook to detect client hydration and keep the button safely guarded until React listeners are attached, allowing Playwright's auto-waiter to synchronize seamlessly.
+            </div>
+          </div>
+
+          <div class="qa-item" onclick="toggleQA(this)">
+            <div class="qa-trigger">
+              <span>Q: How does the application prevent test simulation headers from being abused in production?</span>
+              <span class="qa-arrow">▼</span>
+            </div>
+            <div class="qa-content">
+              <strong>Answer:</strong> All simulation headers (like <code>x-test-simulate-delay</code> and <code>x-test-simulate-error</code>) and the reset endpoint (<code>/api/test-support/reset</code>) are unconditionally gated behind <code>process.env.NODE_ENV !== 'production'</code>. In production, the reset endpoint returns HTTP 403 Forbidden unconditionally. This is proven by Scenario 19 in our automated hardening suite.
+            </div>
+          </div>
+
+          <div class="qa-item" onclick="toggleQA(this)">
+            <div class="qa-trigger">
+              <span>Q: Why use email normalization? Isn't standard string matching enough?</span>
+              <span class="qa-arrow">▼</span>
+            </div>
+            <div class="qa-content">
+              <strong>Answer:</strong> Standard string matching treats <code>User@Domain.com</code> and <code>user@domain.com</code> as distinct strings. Without canonical normalization (<code>email.trim().toLowerCase()</code>), malicious users or accidental typos could submit duplicate applications and bypass business rules. In HireFlow, normalization is enforced uniformly across validation, lookup, and database index storage.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: Code Architecture Inspector -->
+    <section id="code" style="margin-bottom: 5rem;">
+      <div class="section-header">
+        <span class="section-badge">Implementation Verification</span>
+        <h2 class="section-title">Code Architecture Inspector</h2>
+        <p class="section-desc">
+          Review the real, production-grade source code behind each QA feature in the repository.
+        </p>
+      </div>
+
+      <div class="code-viewer-container">
+        <div class="code-tabs-nav">
+          <button class="code-tab-btn active" onclick="selectCodeTab('repo', this)">src/lib/applications/repository.ts</button>
+          <button class="code-tab-btn" onclick="selectCodeTab('api', this)">src/app/api/applications/route.ts</button>
+          <button class="code-tab-btn" onclick="selectCodeTab('form', this)">src/components/ApplicationForm.tsx</button>
+          <button class="code-tab-btn" onclick="selectCodeTab('test15', this)">tests/hardening-scenarios.spec.ts</button>
+          <button class="code-tab-btn" onclick="selectCodeTab('cfg', this)">playwright.config.ts</button>
+        </div>
+
+        <div class="code-box" id="code-display">
+          <!-- Code populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: Execution Cheatsheet -->
+    <section style="margin-bottom: 4rem;">
+      <div class="section-header">
+        <span class="section-badge">CLI Cheatsheet</span>
+        <h2 class="section-title">Quick Verification Commands</h2>
+        <p class="section-desc">
+          Run these commands in PowerShell or terminal inside the project root to reproduce all test results.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.25rem;">
+          <div style="font-weight: 700; color: #fff; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>Run Complete E2E Suite</span>
+            <button class="copy-btn" onclick="copyText('npm run test:e2e')">Copy</button>
+          </div>
+          <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">npm run test:e2e</code>
+          <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.4rem;">Executes all 41 Playwright tests</p>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.25rem;">
+          <div style="font-weight: 700; color: #fff; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>Open Playwright HTML Report</span>
+            <button class="copy-btn" onclick="copyText('npm run test:report')">Copy</button>
+          </div>
+          <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">npm run test:report</code>
+          <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.4rem;">Launches official interactive test report</p>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.25rem;">
+          <div style="font-weight: 700; color: #fff; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>Run Concurrency Hardening Only</span>
+            <button class="copy-btn" onclick="copyText('npx playwright test tests/hardening-scenarios.spec.ts')">Copy</button>
+          </div>
+          <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">npx playwright test tests/hardening-scenarios.spec.ts</code>
+          <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.4rem;">Runs Scenarios 13 through 25</p>
+        </div>
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.25rem;">
+          <div style="font-weight: 700; color: #fff; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+            <span>Type & Quality Check</span>
+            <button class="copy-btn" onclick="copyText('npx tsc --noEmit && npm run lint')">Copy</button>
+          </div>
+          <code style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.85rem;">npx tsc --noEmit &amp;&amp; npm run lint</code>
+          <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.4rem;">Validates TypeScript strict mode and ESLint 9</p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>HireFlow QA Lab • Quality Assurance Architecture & Interactive Visualizer</p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+      Built for Senior QA Automation Engineer evaluation • Playwright Test • Next.js 16 • React 19
+    </p>
+  </footer>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. DATA: 41 TEST CASES
+    // -------------------------------------------------------------
+    const TEST_CASES = [
+      { id: "TC-JOB-01", title: "Job listings load and render required metadata", pri: "P0", type: "Positive / UI", file: "tests/critical-scenarios.spec.ts", desc: "Verifies seed jobs render title, company, salary, experience, status badge, location, and skill tags." },
+      { id: "TC-JOB-02", title: "Clicking a role navigates to matching detail page", pri: "P0", type: "Positive / Integration", file: "tests/critical-scenarios.spec.ts", desc: "Navigates to /jobs/[id], verifies role details, responsibilities list, and back navigation." },
+      { id: "TC-VAL-01", title: "Submitting empty required fields triggers validation", pri: "P0", type: "Negative / Validation", file: "tests/critical-scenarios.spec.ts", desc: "Submitting blank form flags all mandatory fields with role='alert' error messages." },
+      { id: "TC-VAL-03", title: "Invalid email address syntax is rejected", pri: "P0", type: "Negative / Format", file: "tests/critical-scenarios.spec.ts", desc: "RFC email regex rejects invalid patterns (e.g., missing @ or TLD)." },
+      { id: "TC-APP-01", title: "Valid application creates record and returns confirmation", pri: "P0", type: "Positive / End-to-End", file: "tests/critical-scenarios.spec.ts", desc: "Valid application returns 201 Created and renders confirmation with generated ID." },
+      
+      { id: "TC-VAL-02", title: "Whitespace-only values in required fields are rejected", pri: "P1", type: "Negative / Boundary", file: "tests/extended-scenarios.spec.ts", desc: "Fields filled with spaces ('   ') fail validation with custom whitespace messages." },
+      { id: "TC-BND-01", title: "Field input boundary minimums and protocols validated", pri: "P1", type: "Boundary / Validation", file: "tests/extended-scenarios.spec.ts", desc: "Enforces min 2 chars on name, min 7 digits on phone, and http/https protocol on resume URL." },
+      { id: "TC-DUP-01", title: "Duplicate application for same candidate & role prevented", pri: "P1", type: "Negative / Integrity", file: "tests/extended-scenarios.spec.ts", desc: "Second submission for same candidate & job triggers HTTP 409 Conflict error banner." },
+      { id: "TC-REP-01", title: "Rapid repeated clicks & double-submission guarded", pri: "P1", type: "Concurrency / UX", file: "tests/extended-scenarios.spec.ts", desc: "Submit button disables immediately (isSubmitting guard), preventing multiple in-flight posts." },
+      { id: "TC-JOB-03", title: "Invalid job ID renders accessible 404 container", pri: "P1", type: "Negative / Routing", file: "tests/extended-scenarios.spec.ts", desc: "Navigating to /jobs/nonexistent-id displays accessible 'Role Not Found' error with back link." },
+      { id: "TC-ERR-01", title: "Controlled server error (HTTP 500) displays friendly alert", pri: "P1", type: "Resilience / Headers", file: "tests/extended-scenarios.spec.ts", desc: "x-test-simulate-error: 500 header renders friendly UI alert without leaking stack trace." },
+      { id: "TC-SEC-01", title: "Production safety guard blocks test-support endpoints", pri: "P1", type: "Security / Access", file: "tests/extended-scenarios.spec.ts", desc: "Request simulating production environment returns HTTP 403 Forbidden on reset routes." },
+      
+      { id: "TC-NORM-01", title: "Email normalization consistency across duplicate checks", pri: "P1", type: "Negative / Integrity", file: "tests/hardening-scenarios.spec.ts", desc: "Submitting Elena.Rostova+QA@TestCorp.COM followed by lowercase+spaces triggers 409 Conflict." },
+      { id: "TC-CROSS-01", title: "Same candidate applying to a different job is allowed", pri: "P1", type: "Positive / Logic", file: "tests/hardening-scenarios.spec.ts", desc: "Candidate can apply to Job 1 and Job 2 without triggering deduplication collision." },
+      { id: "TC-CONCUR-01", title: "Simultaneous requests duplicate race condition prevention", pri: "P0", type: "Concurrency / Blocker", file: "tests/hardening-scenarios.spec.ts", desc: "Scenario 15: 5 parallel requests fired via Promise.all; exactly 1 returns 201, 4 return 409." },
+      { id: "TC-LEAK-01", title: "Duplicate attempts return safe 409 without DB leaks", pri: "P1", type: "Security / Masking", file: "tests/hardening-scenarios.spec.ts", desc: "Shields internal MongoDB connection strings or driver stack traces upon duplicate error 11000." },
+      { id: "TC-AUTH-01", title: "Unauthenticated candidate PII listing rejected with 401", pri: "P0", type: "Security / PII Guard", file: "tests/hardening-scenarios.spec.ts", desc: "GET /api/applications without credentials fails closed with 401 Unauthorized, protecting PII." },
+      { id: "TC-AUTH-02", title: "Administrator authorization validation (Bearer & Header)", pri: "P1", type: "Security / Auth", file: "tests/hardening-scenarios.spec.ts", desc: "Validates Authorization: Bearer <key> and x-admin-key headers; rejects invalid tokens." },
+      { id: "TC-SEC-02", title: "Test support reset route cannot be operated in production", pri: "P0", type: "Security / Lockdown", file: "tests/hardening-scenarios.spec.ts", desc: "Unconditional NODE_ENV === 'production' 403 Forbidden check prevents data wipe in prod." },
+      { id: "TC-STATE-01", title: "Rejected/unauthorized requests do not mutate stored data", pri: "P1", type: "Integrity / Immutability", file: "tests/hardening-scenarios.spec.ts", desc: "Verifies that rejected requests do not cause side-effects or pollute stored applications." },
+      { id: "TC-MEDIA-01", title: "Content-Type application/json strictly enforced (415)", pri: "P0", type: "Security / HTTP Contract", file: "tests/hardening-scenarios.spec.ts", desc: "Rejects text/plain or non-json media types with 415 Unsupported Media Type." },
+      { id: "TC-ARRAY-01", title: "Array and primitive JSON payloads rejected with 400", pri: "P1", type: "Validation / Boundary", file: "tests/hardening-scenarios.spec.ts", desc: "Rejects [], 123, or primitives before field validation with 400 Bad Request." },
+      { id: "TC-SPLIT-01", title: "MongoDB unavailability prevents JSON fallback & recovers", pri: "P0", type: "Resilience / Architecture", file: "tests/hardening-scenarios.spec.ts", desc: "Eliminates split-brain: returns 503 if MongoDB drops instead of silently switching to file store." },
+      { id: "TC-CRASH-01", title: "Crash-resistant JSON persistence with zero lingering tmp", pri: "P1", type: "Resilience / File", file: "tests/hardening-scenarios.spec.ts", desc: "Atomic temporary-file-and-rename with fsync guarantees zero orphaned .tmp files." },
+      { id: "TC-ROUT-01", title: "Authentic HTTP 404 for missing jobs & 200 for valid jobs", pri: "P0", type: "Routing / HTTP Status", file: "tests/hardening-scenarios.spec.ts", desc: "Verifies correct status codes for missing vs existing catalog routes." },
+      
+      { id: "TC-SRCH-01", title: "Search catalog by job title", pri: "P1", type: "Functional / Search", file: "tests/catalog-filters.spec.ts", desc: "Typing 'Lead QA' dynamically isolates matching job card." },
+      { id: "TC-SRCH-02", title: "Search catalog by company name", pri: "P1", type: "Functional / Search", file: "tests/catalog-filters.spec.ts", desc: "Searching 'FinPulse' displays the Senior SDET posting." },
+      { id: "TC-SRCH-03", title: "Search catalog by location (on-site & remote)", pri: "P1", type: "Functional / Search", file: "tests/catalog-filters.spec.ts", desc: "Filters catalog by geographical location and remote work policy." },
+      { id: "TC-SRCH-04", title: "Search catalog by required skill competency", pri: "P1", type: "Functional / Search", file: "tests/catalog-filters.spec.ts", desc: "Searching 'Playwright' matches roles with that skill pill." },
+      { id: "TC-FILT-01", title: "Combined job-type and job-status multi-filter", pri: "P1", type: "Functional / Multi-Filter", file: "tests/catalog-filters.spec.ts", desc: "Combines Full-time dropdown and Open status filter simultaneously." },
+      { id: "TC-FILT-02", title: "Empty search results renders empty-state component", pri: "P1", type: "UI / Empty State", file: "tests/catalog-filters.spec.ts", desc: "Searching for nonsense string renders accessible empty state notice." },
+      { id: "TC-FILT-03", title: "Clearing filters restores complete catalog", pri: "P1", type: "Functional / Reset", file: "tests/catalog-filters.spec.ts", desc: "Resetting filter input immediately restores full 6 seed job cards." },
+      
+      { id: "TC-BND-02", title: "Maximum boundary character limits enforcement", pri: "P1", type: "Boundary / Max Limit", file: "tests/form-boundaries.spec.ts", desc: "Rejects names >80 chars, email >100, phone >25, url >250, cover letter >2000." },
+      { id: "TC-PHONE-01", title: "Phone validation rejects invalid characters & < 7 digits", pri: "P1", type: "Validation / Syntax", file: "tests/form-boundaries.spec.ts", desc: "Rejects letters/symbols in phone and requires at least 7 actual numeric digits." },
+      { id: "TC-COVER-01", title: "Successful application submission with empty cover letter", pri: "P1", type: "Functional / Optional", file: "tests/form-boundaries.spec.ts", desc: "Cover letter is strictly optional; submits cleanly when omitted." },
+      { id: "TC-CLEAR-01", title: "Field validation error clears dynamically on keystroke", pri: "P1", type: "UX / Interactive", file: "tests/form-boundaries.spec.ts", desc: "Typing into an invalid field immediately clears the inline error message." },
+      { id: "TC-FOCUS-01", title: "Keyboard focus automatically shifts to first invalid field", pri: "P1", type: "Accessibility / Focus", file: "tests/form-boundaries.spec.ts", desc: "A11y focus management moves cursor directly to first erroneous input upon submit." },
+      
+      { id: "TC-MALF-01", title: "Syntactically malformed JSON returns HTTP 400 Bad Request", pri: "P0", type: "Security / Payload", file: "tests/api-contracts.spec.ts", desc: "Invalid JSON syntax ('{badjson') is caught safely and returns 400 Bad Request." },
+      { id: "TC-NOJOB-01", title: "Nonexistent target jobId in payload returns HTTP 404", pri: "P1", type: "Integration / Entity", file: "tests/api-contracts.spec.ts", desc: "Applying for job ID 'job-fake-999' returns 404 Not Found before storage." },
+      { id: "TC-ORDER-01", title: "Administrator listing follows descending creation order", pri: "P1", type: "Integration / Order", file: "tests/api-contracts.spec.ts", desc: "GET /api/applications sorts applications with newest created records first." },
+      { id: "TC-METADATA-01", title: "Database internal metadata excluded from API responses", pri: "P0", type: "Security / Sanitization", file: "tests/api-contracts.spec.ts", desc: "Internal fields like _id and internal flags are stripped from client API responses." }
+    ];
+
+    // -------------------------------------------------------------
+    // 2. PYRAMID LAYER INTERACTION
+    // -------------------------------------------------------------
+    const PYRAMID_DATA = {
+      e2e: {
+        title: "Layer 4: End-to-End (E2E) Browser Journeys",
+        tags: ["Playwright Test 1.64", "Chromium Desktop 1248", "Web-First Assertions"],
+        body: "Simulates authentic user journeys with zero arbitrary sleep() calls. Exercises job search, real-time filtering, dynamic role detail routing, client validation error handling, keyboard focus management, and successful candidate submissions.",
+        list: [
+          "Accessibility-first locators: page.getByRole(), page.getByLabel(), and decoupled data-testid attributes.",
+          "Strict test isolation via test.beforeEach resetting stored data before every single test scenario.",
+          "Deterministic seed catalog of 6 technical roles (Lead QA Automation Engineer, Senior SDET, etc.).",
+          "Automatic failure diagnostics: screenshots, execution traces, and video recordings captured only on failure."
+        ],
+        files: "tests/critical-scenarios.spec.ts • tests/extended-scenarios.spec.ts"
+      },
+      api: {
+        title: "Layer 3: API Contracts & Hardening",
+        tags: ["Playwright API Request Context", "HTTP Status Contracts", "Concurrency Testing"],
+        body: "Tests the Next.js API route handlers (/api/applications, /api/test-support/reset) directly using authentic HTTP requests, verifying headers, payload validation, status codes, and access controls.",
+        list: [
+          "Scenario 15: 5 parallel requests fired via Promise.all to verify atomic deduplication under load.",
+          "Strict Content-Type enforcement: requires application/json; returns HTTP 415 on invalid media types.",
+          "Candidate PII access control: GET /api/applications requires ADMIN_API_KEY; fails closed with 401.",
+          "Controlled failure injection headers: x-test-simulate-delay, x-test-simulate-error: 500."
+        ],
+        files: "tests/hardening-scenarios.spec.ts • tests/api-contracts.spec.ts"
+      },
+      persistence: {
+        title: "Layer 2: Hardened Persistence & Indexing",
+        tags: ["MongoDB Compound Index", "AsyncMutex Fallback", "Split-Brain Prevention"],
+        body: "The core data layer guarantees that candidate records cannot be duplicated, corrupted, or fragmented across storage engines.",
+        list: [
+          "Native MongoDB atomic unique compound index: { normalizedEmail: 1, jobId: 1 } (unique: true).",
+          "In-process AsyncMutex lock serializing local file fallback writes on .data/applications.json.",
+          "Elimination of split-brain: if MongoDB drops, throws DatabaseUnavailableError (503) instead of silent file switch.",
+          "Crash-resistant atomic file writes using temporary file (.tmp) + fsync + atomic rename."
+        ],
+        files: "src/lib/applications/repository.ts"
+      },
+      static: {
+        title: "Layer 1: Static Contracts & Hydration Guards",
+        tags: ["TypeScript Strict Mode", "Next.js 16 App Router", "ESLint 9", "React 19"],
+        body: "The compile-time foundation that eliminates entire classes of runtime bugs before automated test execution even begins.",
+        list: [
+          "TypeScript Strict Mode: compile check (npx tsc --noEmit) validates input/output DTOs.",
+          "React 19 useSyncExternalStore hydration detection guards against premature native HTML form submits.",
+          "Centralized BOUNDARIES constant sharing validation limits across client and server.",
+          "Production deployment lockdown: blocks test reset endpoints unconditionally in NODE_ENV === 'production'."
+        ],
+        files: "src/lib/applications/validation.ts • src/components/ApplicationForm.tsx"
+      }
+    };
+
+    function selectPyramidLayer(key) {
+      document.querySelectorAll('.pyramid-layer').forEach(el => el.classList.remove('active'));
+      const activeEl = event.currentTarget || document.querySelector(`.pyramid-layer[onclick*="${key}"]`);
+      if (activeEl) activeEl.classList.add('active');
+
+      const data = PYRAMID_DATA[key];
+      if (!data) return;
+
+      document.getElementById('pyr-title').textContent = data.title;
+      document.getElementById('pyr-tags').innerHTML = data.tags.map(t => `<span class="badge-tag">${t}</span>`).join('');
+      
+      let html = data.body + '<ul class="pyramid-detail-list">';
+      data.list.forEach(item => {
+        html += `<li>${item}</li>`;
+      });
+      html += '</ul>';
+      document.getElementById('pyr-body').innerHTML = html;
+    }
+
+    // -------------------------------------------------------------
+    // 3. CODE SNIPPET INSPECTOR
+    // -------------------------------------------------------------
+    const CODE_SNIPPETS = {
+      repo: `// src/lib/applications/repository.ts
+// MongoDB Atomic Compound Unique Index + In-Process AsyncMutex Lock
+
+class AsyncMutex {
+  private queue: Promise<void> = Promise.resolve();
+
+  async runExclusive<T>(callback: () => Promise<T> | T): Promise<T> {
+    let release: () => void;
+    const ticket = new Promise<void>((resolve) => { release = resolve; });
+    const previous = this.queue;
+    this.queue = ticket;
+    await previous;
+    try {
+      return await callback();
+    } finally {
+      release!();
+    }
+  }
+}
+
+// MongoDB Initialization with Compound Uniqueness:
+await mongoCollection.createIndex(
+  { normalizedEmail: 1, jobId: 1 },
+  { unique: true, name: 'uniq_normalizedEmail_jobId' }
+);
+
+// Split-brain guard (AUD-P2-02):
+if (isMongoConfigured() && !mongoCollection) {
+  throw new DatabaseUnavailableError('MongoDB connection dropped');
+}`,
+
+      api: `// src/app/api/applications/route.ts
+// Security, Validation, Simulation Headers & PII Protection
+
+export async function POST(request: NextRequest) {
+  // 1. Controlled Test Simulation Checks (Disabled in Production)
+  if (process.env.NODE_ENV !== 'production') {
+    const delay = request.headers.get('x-test-simulate-delay');
+    if (delay) await new Promise(r => setTimeout(r, parseInt(delay, 10)));
+
+    if (request.headers.get('x-test-simulate-error') === '500') {
+      return NextResponse.json({ success: false, error: 'Simulated 500 error' }, { status: 500 });
+    }
+  }
+
+  // 2. Strict Content-Type Enforcement (AUD-P2-05)
+  const contentType = request.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    return NextResponse.json({ error: 'Content-Type must be application/json' }, { status: 415 });
+  }
+
+  // 3. Validation & Persistence with 409 Duplicate Translation
+  const validation = validateApplicationInput(body);
+  if (!validation.isValid) return NextResponse.json({ errors: validation.errors }, { status: 400 });
+
+  // ... Save with atomic deduplication returns 201 or 409 Conflict
+}`,
+
+      form: `// src/components/ApplicationForm.tsx
+// React 19 useSyncExternalStore Hydration Detection & a11y Focus
+
+export default function ApplicationForm({ jobId, jobTitle }: ApplicationFormProps) {
+  // Hydration guard prevents premature browser form submission
+  const isHydrated = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return; // Prevent double-clicks
+
+    const validation = validateApplicationInput({ ...formData, jobId });
+    if (!validation.isValid) {
+      setFieldErrors(validation.errors);
+      // Accessible auto-focus shifts to first invalid input
+      const firstField = validation.errors[0]?.field;
+      document.getElementById(firstField)?.focus();
+      return;
+    }
+    // ... Submit to API
+  };
+}`,
+
+      test15: `// tests/hardening-scenarios.spec.ts
+// Scenario 15: Concurrency Race Condition Automated Test
+
+test('Scenario 15: Concurrent requests for same email/job cannot create duplicates', async ({ request }) => {
+  const payload = {
+    jobId: 'job-qa-lead-001',
+    fullName: 'Alexandra Vance',
+    email: 'alexandra.vance@concurrency.test',
+    phone: '+1 555-444-3333',
+    resumeUrl: 'https://example.com/alexandra.pdf'
+  };
+
+  // Fire 5 identical requests simultaneously via Promise.all
+  const promises = Array.from({ length: 5 }, () =>
+    request.post('/api/applications', { data: payload })
+  );
+
+  const responses = await Promise.all(promises);
+  const statusCodes = responses.map(r => r.status());
+
+  // Exactly ONE request succeeds (201), remaining FOUR are rejected (409 Conflict)
+  const createdCount = statusCodes.filter(s => s === 201).length;
+  const conflictCount = statusCodes.filter(s => s === 409).length;
+
+  expect(createdCount).toBe(1);
+  expect(conflictCount).toBe(4);
+});`,
+
+      cfg: `// playwright.config.ts
+// Single Worker for File Isolation & Automated Failure Diagnostics
+
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: false,
+  workers: 1, // Guarantees isolation with local file storage fallback
+  retries: process.env.CI ? 2 : 0,
+  timeout: 30000,
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }]
+  ],
+  use: {
+    baseURL: 'http://localhost:3000',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure'
+  },
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true
+  }
+});`
+    };
+
+    function selectCodeTab(key, btn) {
+      if (btn) {
+        document.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+      const code = CODE_SNIPPETS[key] || '// Code snippet not found';
+      document.getElementById('code-display').textContent = code;
+    }
+
+    // -------------------------------------------------------------
+    // 4. SIMULATOR TABS & LOGIC
+    // -------------------------------------------------------------
+    function switchSimTab(tabKey) {
+      document.querySelectorAll('.sim-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.sim-panel').forEach(p => p.classList.remove('active'));
+
+      const activeBtn = document.querySelector(`.sim-tab-btn[onclick*="${tabKey}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const targetPanel = document.getElementById(`sim-panel-${tabKey}`);
+      if (targetPanel) targetPanel.classList.add('active');
+    }
+
+    // SIM 1: Live Validation
+    const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
+    function runLiveValidation() {
+      const name = document.getElementById('val-name').value;
+      const email = document.getElementById('val-email').value;
+      const phone = document.getElementById('val-phone').value;
+      const url = document.getElementById('val-url').value;
+
+      document.getElementById('val-name-count').textContent = `${name.length} / 80`;
+      document.getElementById('val-email-count').textContent = `${email.length} / 100`;
+      document.getElementById('val-phone-count').textContent = `${phone.length} / 25`;
+      document.getElementById('val-url-count').textContent = `${url.length} / 250`;
+
+      const errors = {};
+      const log = [];
+
+      // Name validation
+      if (name.length === 0 || name.trim().length === 0) {
+        errors.name = "Full name is required and cannot be empty or whitespace only";
+      } else if (name.trim().length < 2) {
+        errors.name = "Full name must be at least 2 characters";
+      } else if (name.trim().length > 80) {
+        errors.name = "Full name cannot exceed 80 characters";
+      }
+
+      // Email validation
+      if (email.length === 0 || email.trim().length === 0) {
+        errors.email = "Email address is required and cannot be whitespace only";
+      } else if (email.trim().length > 100) {
+        errors.email = "Email cannot exceed 100 characters";
+      } else if (!EMAIL_REGEX.test(email.trim())) {
+        errors.email = "Please provide a valid email address (e.g. name@example.com)";
+      }
+
+      // Phone validation
+      const digits = (phone.match(/\d/g) || []).length;
+      if (phone.length === 0 || phone.trim().length === 0) {
+        errors.phone = "Phone number is required and cannot be whitespace only";
+      } else if (phone.trim().length < 7 || digits < 7) {
+        errors.phone = `Phone number must contain at least 7 digits (min 7 chars, currently ${digits} digits)`;
+      } else if (phone.trim().length > 25) {
+        errors.phone = "Phone number cannot exceed 25 characters";
+      } else if (!/^[0-9+\-()\s.]+$/.test(phone.trim())) {
+        errors.phone = "Phone contains invalid characters. Use digits, +, -, ., (), and spaces.";
+      }
+
+      // URL validation
+      if (url.length === 0 || url.trim().length === 0) {
+        errors.url = "Resume link or URL is required and cannot be whitespace only";
+      } else if (url.trim().length < 5) {
+        errors.url = "Resume URL must be at least 5 characters";
+      } else if (url.trim().length > 250) {
+        errors.url = "Resume URL cannot exceed 250 characters";
+      } else if (!/^https?:\/\//i.test(url.trim())) {
+        errors.url = "Resume URL must begin with http:// or https://";
+      }
+
+      // Update UI hints
+      updateInputHint('val-name', errors.name);
+      updateInputHint('val-email', errors.email);
+      updateInputHint('val-phone', errors.phone);
+      updateInputHint('val-url', errors.url);
+
+      const isValid = Object.keys(errors).length === 0;
+      const statusBadge = document.getElementById('val-status-badge');
+      const consoleBox = document.getElementById('val-console');
+
+      if (isValid) {
+        statusBadge.textContent = "VALID (HTTP 201 ELIGIBLE)";
+        statusBadge.style.color = "var(--accent-emerald)";
+        consoleBox.textContent = `[Validation Engine Check: PASSED]
+---------------------------------------------------------
+Input Payload:
+{
+  "fullName": "${name.trim()}",
+  "email": "${email.trim()}",
+  "normalizedEmail": "${email.trim().toLowerCase()}",
+  "phone": "${phone.trim()}",
+  "resumeUrl": "${url.trim()}"
+}
+
+Status: Ready for atomic server ingestion.
+Zero validation errors. All boundary gates verified.`;
+      } else {
+        statusBadge.textContent = `${Object.keys(errors).length} ERROR(S) (HTTP 400)`;
+        statusBadge.style.color = "var(--accent-rose)";
+        consoleBox.textContent = `[Validation Engine Check: REJECTED]
+---------------------------------------------------------
+Rejection Status: HTTP 400 Bad Request
+Detected Violations:
+${Object.entries(errors).map(([k, v]) => `• [${k}]: ${v}`).join('\n')}
+
+Accessible UI actions:
+• aria-invalid="true" flagged on invalid inputs
+• Auto-focus candidate: '#${Object.keys(errors)[0]}'`;
+      }
+    }
+
+    function updateInputHint(id, msg) {
+      const input = document.getElementById(id);
+      const errEl = document.getElementById(`${id}-err`);
+      if (msg) {
+        input.classList.add('invalid');
+        errEl.style.display = 'flex';
+        errEl.textContent = `⚠ ${msg}`;
+      } else {
+        input.classList.remove('invalid');
+        errEl.style.display = 'none';
+        errEl.textContent = '';
+      }
+    }
+
+    function testValidPreset() {
+      document.getElementById('val-name').value = "Morgan Freeman";
+      document.getElementById('val-email').value = "morgan.freeman@hollywood.com";
+      document.getElementById('val-phone').value = "+1 (555) 234-5678";
+      document.getElementById('val-url').value = "https://cloudscale.io/resumes/morgan.pdf";
+      runLiveValidation();
+    }
+
+    function testWhitespacePreset() {
+      document.getElementById('val-name').value = "   ";
+      document.getElementById('val-email').value = "   ";
+      document.getElementById('val-phone').value = "   ";
+      document.getElementById('val-url').value = "   ";
+      runLiveValidation();
+    }
+
+    function clearValidationInputs() {
+      document.getElementById('val-name').value = "";
+      document.getElementById('val-email').value = "";
+      document.getElementById('val-phone').value = "";
+      document.getElementById('val-url').value = "";
+      runLiveValidation();
+    }
+
+    // SIM 2: Concurrency Race
+    async function runConcurrencyRaceSimulation() {
+      const btn = document.getElementById('btn-run-race');
+      btn.disabled = true;
+      const consoleBox = document.getElementById('race-console');
+      consoleBox.textContent = "[Firing 5 Parallel Asynchronous Requests simultaneously via Promise.all]...\n";
+
+      // Reset items visual
+      for (let i = 1; i <= 5; i++) {
+        const item = document.getElementById(`req-${i}`);
+        item.className = 'req-item';
+        item.querySelector('.badge-tag').textContent = 'IN-FLIGHT';
+        item.querySelector('.badge-tag').className = 'badge-tag';
+      }
+
+      await new Promise(r => setTimeout(r, 600));
+
+      // Random winner among the 5 requests
+      const winnerIndex = Math.floor(Math.random() * 5) + 1;
+      let log = `TIMESTAMP: ${new Date().toISOString()}\n`;
+      log += `==========================================================\n`;
+      log += `CONCURRENCY COLLISION AUDIT REPORT:\n`;
+
+      for (let i = 1; i <= 5; i++) {
+        const item = document.getElementById(`req-${i}`);
+        const tag = item.querySelector('.badge-tag');
+
+        if (i === winnerIndex) {
+          item.classList.add('winner');
+          tag.textContent = '201 CREATED (SAVED)';
+          tag.className = 'badge-tag badge-201';
+          log += `Thread #${i}: [201 CREATED] Acquired atomic lock & created record #app_${Math.random().toString(36).substring(7)}\n`;
+        } else {
+          item.classList.add('rejected');
+          tag.textContent = '409 CONFLICT (REJECTED)';
+          tag.className = 'badge-tag badge-409';
+          log += `Thread #${i}: [409 CONFLICT] Blocked by compound unique index on { normalizedEmail, jobId }\n`;
+        }
+      }
+
+      log += `\nSUMMARY:\n`;
+      log += `• Total Parallel Invocations: 5\n`;
+      log += `• Records Persisted to Disk/DB: EXACTLY 1\n`;
+      log += `• Deduplication Collisions Rejected: 4\n`;
+      log += `• TOCTOU Race Condition: COMPLETELY MITIGATED ✅`;
+
+      consoleBox.textContent = log;
+      btn.disabled = false;
+    }
+
+    function resetRaceTrack() {
+      for (let i = 1; i <= 5; i++) {
+        const item = document.getElementById(`req-${i}`);
+        item.className = 'req-item';
+        item.querySelector('.badge-tag').textContent = 'READY';
+        item.querySelector('.badge-tag').className = 'badge-tag';
+      }
+      document.getElementById('race-console').textContent = "Ready. Click 'Fire 5 Parallel Requests' to run simulation.";
+    }
+
+    // SIM 3: Normalization & Cross-job
+    const simDatabase = [];
+
+    document.getElementById('norm-email').addEventListener('input', (e) => {
+      document.getElementById('norm-preview').textContent = e.target.value.trim().toLowerCase();
+    });
+
+    function submitNormalizedApplication() {
+      const jobId = document.getElementById('norm-job').value;
+      const rawEmail = document.getElementById('norm-email').value;
+      const normalizedEmail = rawEmail.trim().toLowerCase();
+      const consoleBox = document.getElementById('norm-console');
+
+      // Check collision in mock store
+      const existing = simDatabase.find(r => r.jobId === jobId && r.normalizedEmail === normalizedEmail);
+
+      let log = `TIMESTAMP: ${new Date().toLocaleTimeString()}\n`;
+      log += `POST /api/applications\n`;
+      log += `Target Job ID: ${jobId}\n`;
+      log += `Ingested Email: "${rawEmail}"\n`;
+      log += `Normalized Lookup Key: "${normalizedEmail}"\n`;
+      log += `---------------------------------------------------------\n`;
+
+      if (existing) {
+        log += `RESPONSE: [409 CONFLICT]\n`;
+        log += `Error: "Duplicate application detected: Candidate '${normalizedEmail}' has already applied for role '${jobId}'"\n`;
+        log += `Integrity Guard: REJECTED WITHOUT MUTATING DATABASE.`;
+      } else {
+        const newRecord = {
+          id: `app_${Math.random().toString(36).substring(7)}`,
+          jobId,
+          rawEmail,
+          normalizedEmail,
+          createdAt: new Date().toISOString()
+        };
+        simDatabase.push(newRecord);
+        log += `RESPONSE: [201 CREATED]\n`;
+        log += `Success: true\n`;
+        log += `Application ID: ${newRecord.id}\n`;
+        log += `Record committed to persistent store.`;
+      }
+
+      log += `\n\nCURRENT STORE CONTENT (${simDatabase.length} records):\n`;
+      log += JSON.stringify(simDatabase, null, 2);
+
+      consoleBox.textContent = log;
+      document.getElementById('norm-count-badge').textContent = `${simDatabase.length} Applications Stored`;
+    }
+
+    function resetSimDatabase() {
+      simDatabase.length = 0;
+      document.getElementById('norm-count-badge').textContent = `0 Applications Stored`;
+      document.getElementById('norm-console').textContent = "Database wiped. Store is empty.";
+    }
+
+    // SIM 4: Auth & PII
+    function updateAuthHeaderUI() {
+      const mode = document.getElementById('auth-mode').value;
+      const group = document.getElementById('auth-token-group');
+      group.style.display = (mode === 'none') ? 'none' : 'block';
+    }
+
+    function setTokenPreset(type) {
+      document.getElementById('auth-token').value = (type === 'correct') ? 'secret-admin-token-2026' : 'invalid-hacker-token';
+    }
+
+    function testAuthRequest() {
+      const mode = document.getElementById('auth-mode').value;
+      const token = document.getElementById('auth-token').value;
+      const consoleBox = document.getElementById('auth-console');
+      const badge = document.getElementById('auth-status-badge');
+
+      const expectedKey = 'secret-admin-token-2026';
+      let isAuthed = false;
+
+      if (mode === 'bearer' && token === expectedKey) isAuthed = true;
+      if (mode === 'header' && token === expectedKey) isAuthed = true;
+
+      if (isAuthed) {
+        badge.textContent = "200 OK (AUTHORIZED)";
+        badge.style.color = "var(--accent-emerald)";
+        consoleBox.textContent = `[GET /api/applications] -> HTTP 200 OK
+Headers: ${mode === 'bearer' ? 'Authorization: Bearer ' + token : 'x-admin-key: ' + token}
+---------------------------------------------------------
+CANDIDATE PII EXPOSED TO VERIFIED ADMIN:
+[
+  {
+    "id": "app_lead_01",
+    "fullName": "Elena Rostova",
+    "email": "elena.rostova@testcorp.com",
+    "phone": "+1 555-111-2222",
+    "resumeUrl": "https://example.com/resumes/elena.pdf",
+    "jobTitle": "Lead QA Automation Engineer"
+  },
+  {
+    "id": "app_sdet_02",
+    "fullName": "Jordan Lee",
+    "email": "jordan.lee@testcompany.org",
+    "phone": "+1 555-456-7890",
+    "resumeUrl": "https://example.com/resumes/jordan.pdf",
+    "jobTitle": "Senior SDET"
+  }
+]`;
+      } else {
+        badge.textContent = "401 UNAUTHORIZED (BLOCKED)";
+        badge.style.color = "var(--accent-rose)";
+        consoleBox.textContent = `[GET /api/applications] -> HTTP 401 Unauthorized
+Headers: ${mode === 'none' ? '[No Authorization Header]' : 'Invalid Credentials Supplied'}
+---------------------------------------------------------
+{
+  "success": false,
+  "error": "Unauthorized: Administrator authentication required to view applicant records."
+}
+
+PII DEFENSE REPORT:
+• Zero candidate names, phone numbers, or resumes disclosed.
+• Fails-closed by design to protect privacy.`;
+      }
+    }
+
+    // SIM 5: Simulation Headers
+    async function executeSimulationHeaders() {
+      const err = document.getElementById('sim-header-err').value;
+      const delay = parseInt(document.getElementById('sim-header-delay').value, 10);
+      const consoleBox = document.getElementById('headers-console');
+      const badge = document.getElementById('header-status-badge');
+      const btn = document.getElementById('btn-fire-sim');
+
+      btn.disabled = true;
+      badge.textContent = "IN-FLIGHT...";
+      badge.style.color = "var(--accent-cyan)";
+      consoleBox.textContent = `Dispatching request with QA simulation headers...
+• x-test-simulate-delay: ${delay}ms
+• x-test-simulate-error: ${err}
+Please wait...`;
+
+      await new Promise(r => setTimeout(r, delay + 300));
+
+      if (err === '500') {
+        badge.textContent = "HTTP 500 (SIMULATED)";
+        badge.style.color = "var(--accent-rose)";
+        consoleBox.textContent = `HTTP/1.1 500 Internal Server Error
+Content-Type: application/json
+Latency: ${delay}ms
+---------------------------------------------------------
+{
+  "success": false,
+  "error": "Simulated internal server error for QA resilience verification."
+}
+
+CLIENT UI BEHAVIOR OBSERVED:
+• In-app friendly alert banner displayed to candidate: "Something went wrong on our end. Please try again."
+• Zero server-side stack trace or database driver details exposed to user.`;
+      } else if (err === '400') {
+        badge.textContent = "HTTP 400 (FORCED REJECT)";
+        badge.style.color = "var(--accent-amber)";
+        consoleBox.textContent = `HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Latency: ${delay}ms
+---------------------------------------------------------
+{
+  "success": false,
+  "error": "Simulated client rejection for QA test scenario."
+}`;
+      } else {
+        badge.textContent = "HTTP 201 (SUCCESS)";
+        badge.style.color = "var(--accent-emerald)";
+        consoleBox.textContent = `HTTP/1.1 201 Created
+Content-Type: application/json
+Latency: ${delay}ms
+---------------------------------------------------------
+{
+  "success": true,
+  "message": "Application successfully received and recorded",
+  "data": {
+    "applicationId": "app_sim_${Math.random().toString(36).substring(7)}",
+    "jobTitle": "Lead QA Automation Engineer"
+  }
+}`;
+      }
+
+      btn.disabled = false;
+    }
+
+    // -------------------------------------------------------------
+    // 5. TRACEABILITY MATRIX RENDERING & SEARCH
+    // -------------------------------------------------------------
+    let currentPriorityFilter = 'all';
+
+    function renderMatrix(items) {
+      const tbody = document.getElementById('matrix-tbody');
+      tbody.innerHTML = '';
+
+      items.forEach(tc => {
+        const tr = document.createElement('tr');
+        const priBadgeClass = tc.pri === 'P0' ? 'badge-p0' : (tc.pri === 'P1' ? 'badge-p1' : 'badge-p2');
+
+        tr.innerHTML = `
+          <td><strong style="color: #fff; font-family: var(--font-mono);">${tc.id}</strong></td>
+          <td>
+            <div style="font-weight: 600; color: #f1f5f9; margin-bottom: 0.15rem;">${tc.title}</div>
+            <div style="font-size: 0.775rem; color: var(--text-dim);">${tc.desc}</div>
+          </td>
+          <td><span class="badge-priority ${priBadgeClass}">${tc.pri}</span></td>
+          <td><span style="font-size: 0.75rem; color: #cbd5e1;">${tc.type}</span></td>
+          <td><code style="font-size: 0.75rem; color: var(--accent-cyan); font-family: var(--font-mono);">${tc.file.replace('tests/', '')}</code></td>
+          <td><span class="status-passed"><span>✔</span> PASSED</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterMatrix() {
+      const query = document.getElementById('matrix-search-input').value.toLowerCase().trim();
+      let filtered = TEST_CASES;
+
+      if (currentPriorityFilter !== 'all') {
+        filtered = filtered.filter(tc => tc.pri === currentPriorityFilter);
+      }
+
+      if (query.length > 0) {
+        filtered = filtered.filter(tc => 
+          tc.id.toLowerCase().includes(query) ||
+          tc.title.toLowerCase().includes(query) ||
+          tc.desc.toLowerCase().includes(query) ||
+          tc.file.toLowerCase().includes(query) ||
+          tc.type.toLowerCase().includes(query)
+        );
+      }
+
+      renderMatrix(filtered);
+    }
+
+    function filterByPriority(pri, btn) {
+      currentPriorityFilter = pri;
+      document.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterMatrix();
+    }
+
+    // -------------------------------------------------------------
+    // 6. Q&A ACCORDION
+    // -------------------------------------------------------------
+    function toggleQA(item) {
+      item.classList.toggle('open');
+    }
+
+    // -------------------------------------------------------------
+    // 7. COPY HELPER
+    // -------------------------------------------------------------
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        alert(`Copied to clipboard: ${txt}`);
+      });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMatrix(TEST_CASES);
+      selectCodeTab('repo');
+      runLiveValidation();
+    });
+  </script>
+</body>
+</html>
