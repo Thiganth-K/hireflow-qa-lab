@@ -1,39 +1,57 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   return (
-    <header className="border-b border-slate-200 bg-white/95 backdrop-blur sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link
-          href="/"
-          className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-md p-1"
-          aria-label="HireFlow QA Lab Home"
-        >
-          <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-blue-700 transition-colors">
-            HF
-          </div>
-          <div>
-            <span className="text-lg font-bold text-slate-900 tracking-tight block leading-tight">
-              HireFlow <span className="text-blue-600">QA Lab</span>
-            </span>
-            <span className="text-xs text-slate-500 font-medium block">
-              Job Application Platform
-            </span>
-          </div>
-        </Link>
-
-        <nav className="flex items-center gap-4">
+    <header className="border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between">
+        {/* Brand Link with Official HireFlow Logo */}
+        <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors px-3 py-1.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            className="flex items-center gap-2 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-lg py-1"
+            aria-label="HireFlow Home"
           >
-            Job Board
+            <Image
+              src="/HireFlow Modern Jobs Logo.png"
+              alt="HireFlow - Modern Jobs. Real Opportunities."
+              width={240}
+              height={60}
+              priority
+              className="h-11 sm:h-13 md:h-14 w-auto object-contain transition-transform group-hover:scale-[1.02]"
+            />
           </Link>
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Deterministic QA Environment
+
+          {/* Editorial Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link
+              href="/"
+              className="text-xs font-semibold text-[var(--ink)] hover:text-[var(--accent)] transition-colors py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              Jobs
+            </Link>
+            <a
+              href="#catalog-section"
+              className="text-xs font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              Catalog
+            </a>
+            <a
+              href="#catalog-section"
+              className="text-xs font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+            >
+              Verification
+            </a>
+          </nav>
+        </div>
+
+        {/* Right Status: designed by Thiganth */}
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50/80 text-[var(--accent)] border border-indigo-100 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-[var(--accent)]"></span>
+            <span>designed by Thiganth</span>
           </div>
-        </nav>
+        </div>
       </div>
     </header>
   );
