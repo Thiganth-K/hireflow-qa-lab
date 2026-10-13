@@ -25,7 +25,7 @@
 
 **HireFlow QA Lab** is a high-reliability recruitment web platform created as part of the **HireKiwi (Infinitica) QA Engineer Assessment**. The platform provides an end-to-end job discovery, review, and application submission workflow specifically architected for testability, deterministic verification, accessibility compliance, and controlled failure simulation.
 
-![HireFlow Hero Interface](public/herosection.png)
+![HireFlow Hero Interface](public/doc1.png)
 
 ### 🎯 Assessment Scope Alignment
 
@@ -74,7 +74,7 @@ start graphify-out/graph.html
 
 The user interface follows the **Quiet Precision** design methodology, balancing high visual appeal with strict functional symmetry:
 
-![Workspace Environment](public/hero-workspace.jpg)
+![Workspace Environment](public/doc2.jpg)
 
 ### 🎨 Key Design System Highlights
 
